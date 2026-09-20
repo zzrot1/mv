@@ -1,0 +1,279 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgb(5 5 5 / 42%);
+  cursor: default;
+}
+
+.modalPanel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 470px);
+  max-height: min(760px, calc(100vh - 40px));
+  overflow: auto;
+  border: 1px solid #dedfdb;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 20%);
+}
+
+.closeButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid #e3e4e0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #111111;
+}
+
+.loginCard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 40px 34px 30px;
+}
+
+.form {
+  display: grid;
+  gap: 22px;
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 0 22px;
+  text-align: center;
+}
+
+.logoLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoMark {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 10px;
+  color: #111111;
+}
+
+.title {
+  color: #050505;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.22;
+}
+
+.description,
+.terms {
+  color: #6e7478;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.description a,
+.terms a {
+  color: #050505;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.inlineButton {
+  color: #050505;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.strongText {
+  color: #050505;
+  font-weight: 500;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  color: #111111;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #d8dbd6;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #050505;
+  padding: 0 13px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.input::placeholder {
+  color: #8a8f92;
+}
+
+.errorMessage,
+.successMessage {
+  border: 1px solid #f0c7c1;
+  border-radius: 10px;
+  background: #fff4f2;
+  color: #9f2f22;
+  font-size: 14px;
+  line-height: 1.35;
+  padding: 10px 12px;
+}
+
+.successMessage {
+  border-color: #bedac7;
+  background: #f0faf3;
+  color: #23713a;
+}
+
+.primaryButton,
+.socialButton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.primaryButton {
+  width: 100%;
+  background: #111111;
+  color: #ffffff;
+}
+
+.primaryButton:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #767b7e;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.separator::before,
+.separator::after {
+  height: 1px;
+  flex: 1;
+  background: #e0e2de;
+  content: "";
+}
+
+.socialGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.socialButton {
+  border: 1px solid #d8dbd6;
+  background: #ffffff;
+  color: #111111;
+  padding: 0 12px;
+}
+
+.socialIcon {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.socialIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.terms {
+  padding: 0 12px;
+  text-align: center;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .closeButton:hover,
+  .socialButton:hover {
+    border-color: #bfc3bd;
+    background: #f8f9f7;
+  }
+
+  .primaryButton:hover {
+    background: #2f2f2f;
+  }
+}
+
+@media (max-width: 560px) {
+  .overlay {
+    align-items: end;
+    padding: 0;
+  }
+
+  .modalPanel {
+    width: 100%;
+    max-height: calc(100vh - 20px);
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .loginCard {
+    padding: 42px 20px 26px;
+  }
+
+  .socialGrid {
+    grid-template-columns: 1fr;
+  }
+}

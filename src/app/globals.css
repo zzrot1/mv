@@ -11,7 +11,7 @@
   --color-sale: #b73824;
   --color-focus: #2457ff;
 
-  --font-sans: var(--font-geist-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: "Helvetica Neue", Helvetica, var(--font-google-sans), Arial, sans-serif;
   --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
 
   --page-max: 1680px;

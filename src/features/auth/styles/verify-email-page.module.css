@@ -1,0 +1,90 @@
+.page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  background: #f3f4f2;
+  color: #050505;
+  padding: 24px;
+}
+
+.card {
+  display: grid;
+  width: min(100%, 520px);
+  gap: 16px;
+  border: 1px solid #dedfdb;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 12px 34px rgb(0 0 0 / 8%);
+  padding: 34px;
+}
+
+.eyebrow {
+  color: #6e7478;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.title {
+  color: #050505;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.12;
+}
+
+.description {
+  color: #64686b;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.primaryLink {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 16px;
+}
+
+.progressBar {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ecedea;
+}
+
+.progressBar::after {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  border-radius: inherit;
+  animation: loading 1s infinite ease-in-out;
+  background: #111111;
+  content: "";
+}
+
+@keyframes loading {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(240%);
+  }
+}
+
+@media (max-width: 560px) {
+  .card {
+    padding: 26px 20px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+}

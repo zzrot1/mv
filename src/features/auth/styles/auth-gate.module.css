@@ -1,0 +1,52 @@
+.page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  background: #f3f4f2;
+  color: #050505;
+  padding: 24px;
+}
+
+.card {
+  display: grid;
+  width: min(100%, 460px);
+  gap: 14px;
+  border: 1px solid #dedfdb;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 12px 34px rgb(0 0 0 / 8%);
+  padding: 32px;
+}
+
+.eyebrow {
+  color: #6e7478;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.title {
+  color: #050505;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.12;
+}
+
+.description {
+  color: #64686b;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.primaryButton {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 16px;
+}

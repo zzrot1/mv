@@ -1,3 +1,3 @@
-export const allApiResourceNames = [] as const;
+export const allApiResourceNames = ["auth","profile","users"] as const;
 
 export type AllApiResourceName = (typeof allApiResourceNames)[number];

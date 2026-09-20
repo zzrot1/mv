@@ -1,99 +1,11 @@
 import type { QueryClient, QueryKey, UseMutationOptions } from "@tanstack/react-query";
-
-/**
- * Contractul dupa care gasim o inregistrare in cache: are `id`.
- * `number` e acolo fiindca destule API-uri numeroteaza utilizatorii.
- */
-export type RecordWithId = { id: string | number };
-
-/**
- * Inregistrarile dintr-un raspuns, la nivel de tip. Perechea de compilare a lui
- * `DataHandler.readRecords`, ca `dataPage.records` sa fie tipizat fara adnotari:
- *
- *   `PagedCompaniesResponse` -> `CompanyListItemDto[]`
- *   `DealsListItemDto[]`     -> `DealsListItemDto[]`
- *   `CompanyDto`             -> `CompanyDto[]`
- *
- * Parantezele drepte opresc distributia pe union-uri: fara ele,
- * `Response | undefined` s-ar imparti in doua ramuri si am ajunge la `undefined[]`.
- */
-export type RecordsOf<TResponse> = [NonNullable<TResponse>] extends [
-  readonly (infer TRecord)[],
-]
-  ? TRecord[]
-  : [NonNullable<TResponse>] extends [{ data: readonly (infer TRecord)[] }]
-    ? TRecord[]
-    : NonNullable<TResponse>[];
-
-/**
- * Exceptiile de la `defaultRules`, per resursa. Ce lipseste se completeaza de acolo.
- *
- * `alsoChanges` sunt resursele pe care serverul le modifica in acelasi timp si
- * care NU se pot deduce din raspuns — de exemplu cand statusul unei companii
- * apare copiat si in lista de task-uri. Le pui aici cand vezi ca o **alta** pagina
- * ramane cu date vechi dupa o scriere.
- *
- * `staysFreshFor` e in ms; `Number.POSITIVE_INFINITY` inseamna "doar la
- * reincarcarea paginii sau la invalidare explicita".
- */
-export type ResourceRules<TResource extends string> = Partial<
-  Record<TResource, { staysFreshFor?: number; alsoChanges?: readonly TResource[] }>
->;
-
-/**
- * Ce se intampla cu cache-ul in jurul unei scrieri. Nu-l construiesti de mana:
- * il iei din `DataHandler.writeFromResponse`, `reloadAfterWrite`,
- * `writeOptimistically` sau `skipCacheWrite` — ele tipizeaza raspunsul si
- * payload-ul la locul apelului, ceea ce `meta` singur nu poate.
- */
-export type WritePlan =
-  | {
-      readonly strategy: "fromResponse";
-      readonly pickRecord: (response: unknown) => RecordWithId | undefined;
-    }
-  | { readonly strategy: "reload"; readonly queryKeys: readonly QueryKey[] }
-  | {
-      readonly strategy: "optimistic";
-      readonly pickRecord: (variables: unknown) => RecordWithId | undefined;
-    }
-  | { readonly strategy: "skip" };
-
-/**
- * Ce poate cere un call site prin `mutation.meta`. Aplicatia il leaga de
- * `Register` din `@tanstack/react-query` ca sa primeasca autocomplete —
- * biblioteca nu o face in locul ei, ca sa poti adauga si campuri proprii.
- */
-export type WriteMeta = {
-  successMessage?: string;
-  errorMessage?: string;
-  /** Ce se intampla cu cache-ul. Fara el: `writeFromResponse()`. */
-  cache?: WritePlan;
-};
-
-/** Ce primeste `onWriteCompleted` dupa fiecare scriere reusita. */
-export type WriteEvent<TResource extends string> = {
-  operationName: string;
-  resourceName: TResource;
-  /**
-   * `merged` / `removed` inseamna zero request-uri pentru resursa asta —
-   * inregistrarea a fost schimbata direct in cache. `reloaded` inseamna ca nu
-   * s-a putut, sau ca pagina a cerut-o explicit, deci s-a mai facut un GET.
-   */
-  outcome: "merged" | "removed" | "reloaded" | "skipped";
-  /** Planul cerut de call site prin `meta.cache`, sau cel implicit. */
-  strategy: WritePlan["strategy"];
-  /** Daca payload-ul a fost scris in cache inainte de raspuns. */
-  wasOptimistic: boolean;
-  /** Query key-urile chiar modificate in cache. */
-  updatedQueryKeys: readonly QueryKey[];
-  /** Resursele re-cerute intregi. */
-  reloadedResources: readonly TResource[];
-  /** Query key-urile re-cerute tintit, prin `reloadAfterWrite(key)`. */
-  reloadedQueryKeys: readonly QueryKey[];
-};
-
-/** Starea query-urilor unei resurse, copiata ca sa poata fi pusa la loc. */
-type CacheSnapshot = readonly (readonly [QueryKey, unknown])[];
+import type {
+  CacheSnapshot,
+  RecordWithId,
+  ResourceRules,
+  WriteEvent,
+  WritePlan,
+} from "./utils";
 
 /**
  * Tot ce tine de date: cum se citesc raspunsurile, cum se scrie in cache-ul

@@ -19,11 +19,23 @@ export async function toApiError(error: unknown): Promise<ApiError> {
 }
 
 export function getErrorMessage(error: unknown) {
+  const bodyMessage = readErrorMessage((error as ApiError | undefined)?.body);
+
+  if (bodyMessage) {
+    return bodyMessage;
+  }
+
   if (error instanceof Error && error.message) {
     return error.message;
   }
 
   return "The request failed.";
+}
+
+export function getErrorStatus(error: unknown) {
+  const { status } = (error ?? {}) as Partial<ApiError>;
+
+  return typeof status === "number" ? status : undefined;
 }
 
 async function responseToApiError(response: Response): Promise<ApiError> {
@@ -52,11 +64,44 @@ function readErrorMessage(body: unknown) {
     return undefined;
   }
 
-  const { error, message } = body as Record<string, unknown>;
+  const { details, error, message } = body as Record<string, unknown>;
+  const detailMessage = readValidationDetails(details);
 
-  return typeof message === "string"
-    ? message
+  return detailMessage
+    ? detailMessage
+    : typeof message === "string"
+      ? message
     : typeof error === "string"
       ? error
       : undefined;
+}
+
+function readValidationDetails(details: unknown) {
+  if (!Array.isArray(details)) {
+    return undefined;
+  }
+
+  const messages = details
+    .map((detail) => {
+      if (!detail || typeof detail !== "object") {
+        return undefined;
+      }
+
+      const { message, path } = detail as Record<string, unknown>;
+
+      if (typeof message !== "string") {
+        return undefined;
+      }
+
+      return typeof path === "string" && path
+        ? `${formatValidationPath(path)}: ${message}`
+        : message;
+    })
+    .filter((message): message is string => Boolean(message));
+
+  return messages.length ? messages.join("\n") : undefined;
+}
+
+function formatValidationPath(path: string) {
+  return path.charAt(0).toUpperCase() + path.slice(1);
 }

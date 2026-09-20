@@ -5,7 +5,8 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 
-import { DataHandler, type RecordWithId, type RecordsOf } from "./data-handler";
+import { DataHandler } from "./data-handler";
+import type { RecordWithId, RecordsOf } from "./utils";
 
 /** GET-ul paginii, exact cum il intoarce hook-ul generat de orval. */
 type PageQuery<TData> = UseQueryResult<TData, unknown> & { queryKey: QueryKey };
