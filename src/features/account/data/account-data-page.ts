@@ -7,7 +7,7 @@ import type { AccountProfile } from "../model/account";
 export class AccountDataPage extends DataPage<PickUserExcludeKeyofUserPassword> {
   get accountProfile(): AccountProfile | undefined {
     const user = this.records[0];
-
+    console.log("recorrds", this.records);
     return user ? AccountDataPage.mapAccountProfile(user) : undefined;
   }
 
@@ -26,11 +26,11 @@ export class AccountDataPage extends DataPage<PickUserExcludeKeyofUserPassword> 
       fullName,
       hasAddresses: Boolean(
         user.addressLine1 ||
-          user.addressLine2 ||
-          user.city ||
-          user.county ||
-          user.postalCode ||
-          user.country,
+        user.addressLine2 ||
+        user.city ||
+        user.county ||
+        user.postalCode ||
+        user.country,
       ),
       initials: AccountDataPage.getInitials(fullName, user.email),
       marketingEmailEnabled: false,

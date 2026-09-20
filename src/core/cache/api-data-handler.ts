@@ -7,11 +7,11 @@ import {
   type WriteMeta,
 } from "orval-data-handler";
 
-import { getErrorMessage } from "@/core/api-error";
 import {
   allApiResourceNames,
   type AllApiResourceName,
 } from "@/service-api/generated/api-resource-names";
+import { getErrorMessage } from "orval-data-handler";
 
 const nonDataResourceNames = ["auth"] as const;
 

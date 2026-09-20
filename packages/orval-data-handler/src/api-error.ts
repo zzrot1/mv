@@ -71,9 +71,9 @@ function readErrorMessage(body: unknown) {
     ? detailMessage
     : typeof message === "string"
       ? message
-    : typeof error === "string"
-      ? error
-      : undefined;
+      : typeof error === "string"
+        ? error
+        : undefined;
 }
 
 function readValidationDetails(details: unknown) {

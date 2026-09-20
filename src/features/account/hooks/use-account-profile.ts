@@ -21,11 +21,14 @@ export function useAccountProfile() {
       retry: false,
     },
   });
-  const accountDataPage = useDataPage(AccountDataPage, profileQuery);
+  const { isLoading, accountProfile } = useDataPage(
+    AccountDataPage,
+    profileQuery,
+  );
 
   return {
-    isLoading: accountDataPage.isLoading,
+    isLoading,
     navigationItems: accountNavigationItems,
-    profile: accountDataPage.accountProfile,
+    profile: accountProfile,
   };
 }

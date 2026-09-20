@@ -1,6 +1,7 @@
 "use client";
 
-import { useQueryClient, type UseMutationOptions } from "@tanstack/react-query";
+import type { UseMutationOptions } from "@tanstack/react-query";
+import { useDataHandlerMutationOptions } from "orval-data-handler";
 
 import { apiDataHandler, type ApiMutationMeta } from "@/core/cache/api-data-handler";
 
@@ -15,11 +16,8 @@ export function useApiMutationOptions<TData, TError, TVariables, TContext>(
   endpoint: { url: string },
   operation: { operationId: string; operationName: string },
 ) {
-  const queryClient = useQueryClient();
-
-  return apiDataHandler.buildMutationOptions(options, endpoint, operation, {
+  return useDataHandlerMutationOptions(apiDataHandler, options, endpoint, operation, {
     notify: notifyMutation,
-    queryClient,
   });
 }
 

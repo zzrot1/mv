@@ -2,7 +2,7 @@
 
 import { LoginModal } from "@/features/auth/components/login-modal";
 import { useLoginModal } from "@/features/auth/hooks/use-login-modal";
-import { getErrorStatus } from "@/core/api-error";
+import { getErrorStatus } from "orval-data-handler";
 import { useGetProfile } from "@/service-api/generated/endpoints/profile/profile";
 
 import styles from "../styles/auth-gate.module.css";

@@ -2,7 +2,7 @@
 
 import { type FormEvent, useEffect } from "react";
 
-import { getErrorMessage } from "@/core/api-error";
+import { getErrorMessage } from "orval-data-handler";
 import { useUpdateProfile } from "@/service-api/generated/endpoints/profile/profile";
 
 import type { AccountProfile } from "../model/account";

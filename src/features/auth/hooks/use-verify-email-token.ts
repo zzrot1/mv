@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { getErrorMessage } from "@/core/api-error";
+import { getErrorMessage } from "orval-data-handler";
 import { useVerifyEmail } from "@/service-api/generated/endpoints/auth/auth";
 
 export function useVerifyEmailToken(token?: string) {

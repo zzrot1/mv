@@ -1,9 +1,10 @@
-import { toApiError, type ApiError } from "@/core/api-error";
 import {
   clearAccessToken,
   getAccessToken,
   setAccessToken,
-} from "@/core/auth/access-token";
+  toApiError,
+  type ApiError,
+} from "orval-data-handler";
 
 type ApiFetchOptions = Omit<RequestInit, "body"> & {
   params?: Record<string, unknown>;

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { getErrorMessage } from "@/core/api-error";
+import { getErrorMessage } from "orval-data-handler";
 import { useLogout } from "@/service-api/generated/endpoints/auth/auth";
 
 import styles from "../styles/account-page.module.css";

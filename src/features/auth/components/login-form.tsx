@@ -3,8 +3,11 @@
 import { type FormEvent, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { getErrorMessage, getErrorStatus } from "@/core/api-error";
-import { setAccessToken } from "@/core/auth/access-token";
+import {
+  getErrorMessage,
+  getErrorStatus,
+  setAccessToken,
+} from "orval-data-handler";
 import {
   useLogin,
   useRegister,

@@ -1,4 +1,8 @@
-import type { QueryClient, QueryKey, UseMutationOptions } from "@tanstack/react-query";
+import type {
+  QueryClient,
+  QueryKey,
+  UseMutationOptions,
+} from "@tanstack/react-query";
 import type {
   CacheSnapshot,
   RecordWithId,
@@ -7,73 +11,16 @@ import type {
   WritePlan,
 } from "./utils";
 
-/**
- * Tot ce tine de date: cum se citesc raspunsurile, cum se scrie in cache-ul
- * react-query si ce se intampla in jurul fiecarei scrieri.
- *
- * Doua jumatati, despartite dupa cum depind de configurare:
- *
- *  - **statice** — mecanica pura: citeste un raspuns, scrie sau scoate o
- *    inregistrare, invalideaza o resursa. N-au nevoie de nicio instanta, deci le
- *    foloseste si `DataPage`, si orice cod care scrie in cache pe cont propriu
- *    (un import care ruleaza in batch-uri, de exemplu).
- *  - **de instanta** — politica unui API: ce resurse exista, cat stau proaspete,
- *    ce se intampla dupa o mutatie. O extinzi **o singura data** pe aplicatie.
- *
- * ```ts
- * class ApiDataHandler extends DataHandler<"companies" | "deals"> {
- *   protected readonly resourceNames = ["companies", "deals"] as const;
- *   protected readonly rules: ResourceRules<"companies" | "deals"> = {
- *     companies: { alsoChanges: ["deals"] },
- *   };
- * }
- * ```
- *
- * Dupa aceea fiecare `useCreate*` / `useUpdate*` / `useDelete*` generat de orval
- * primeste, fara nicio linie la locul apelului: mesaj de eroare, actualizarea
- * cache-ului si mesaj de succes daca pagina a cerut unul.
- *
- * Membrii sunt in ordinea in care ii intalnesti.
- */
 export abstract class DataHandler<TResource extends string> {
-  // --- 1. Ce dai tu -------------------------------------------------------
-
-  /**
-   * Numele resurselor, adica primul segment al rutelor (`/companies/{id}`) si
-   * primul element al query key-urilor (`["companies", params]`). A doua parte
-   * e adevarata doar daca generezi cu `shouldSplitQueryKey: true`.
-   *
-   * Ce nu e in lista e ignorat complet: scrierile catre `/auth/logout` nu ating
-   * cache-ul daca `"auth"` lipseste de aici. E util tocmai pentru rutele care
-   * nu tin date de afisat.
-   */
   protected abstract readonly resourceNames: readonly TResource[];
 
-  /** Doar exceptiile. Vezi `ResourceRules` pentru cand adaugi ceva aici. */
   protected readonly rules: ResourceRules<TResource> = {};
 
-  /**
-   * Ce se aplica resurselor care nu apar in `rules`: date proaspete un minut si
-   * nicio alta resursa re-ceruta. O resursa noua merge corect fara sa scrii nimic.
-   */
   protected readonly defaultRules = {
     alsoChanges: [] as readonly TResource[],
     staysFreshFor: 60_000,
   };
 
-  // --- 2. Ce legi in aplicatie --------------------------------------------
-
-  /**
-   * Optiunile primite de fiecare mutatie generata.
-   *
-   * Se cheama din custom hook-ul pe care orval il primeste prin
-   * `output.override.query.mutationOptions`. Primele trei argumente vin de la
-   * orval; al patrulea e tot ce tine de React, fiindca aici suntem in afara lui:
-   * clasa nu cheama hook-uri, deci ramane logica pura, testabila fara React.
-   *
-   * Ce trimite pagina in `mutation: { ... }` ramane valabil — callback-urile ei
-   * sunt chemate dupa ale noastre, nu inlocuite, si primesc contextul lor, neatins.
-   */
   buildMutationOptions<TData, TError, TVariables, TContext>(
     options: UseMutationOptions<TData, TError, TVariables, TContext>,
     endpoint: { url: string },
@@ -83,7 +30,6 @@ export abstract class DataHandler<TResource extends string> {
       notify = () => {},
     }: {
       queryClient: QueryClient;
-      /** Fara ea, `meta.successMessage` si mesajele de eroare sunt ignorate. */
       notify?: (level: "success" | "error", message: string) => void;
     },
   ): UseMutationOptions<TData, TError, TVariables, TContext> {
@@ -91,23 +37,22 @@ export abstract class DataHandler<TResource extends string> {
     const plan = meta.cache ?? DataHandler.defaultWritePlan;
     const resourceName = this.resolveResourceName(endpoint.url);
     const { operationName } = operation;
-
-    // Ruta necunoscuta: n-avem ce sincroniza si nici ce raporta. Mesajele si
-    // callback-urile paginii merg mai departe, ca oricand.
     const syncsCache = resourceName !== undefined;
 
     return {
       ...options,
-
-      // Il punem doar cand chiar avem de scris inainte de raspuns; altfel
-      // `options.onMutate` ramane exact cum l-a dat pagina.
       ...(syncsCache && plan.strategy === "optimistic"
         ? {
             onMutate: async (
               variables: TVariables,
               context: Parameters<
                 NonNullable<
-                  UseMutationOptions<TData, TError, TVariables, TContext>["onMutate"]
+                  UseMutationOptions<
+                    TData,
+                    TError,
+                    TVariables,
+                    TContext
+                  >["onMutate"]
                 >
               >[1],
             ) => {
@@ -118,9 +63,6 @@ export abstract class DataHandler<TResource extends string> {
                 plan,
                 variables,
               );
-
-              // Fara `onMutate` la locul apelului, contextul e `undefined` —
-              // exact ce ar fi produs si react-query singur.
               return (await options.onMutate?.(variables, context)) as TContext;
             },
           }
@@ -159,12 +101,6 @@ export abstract class DataHandler<TResource extends string> {
     };
   }
 
-  /**
-   * De chemat o data, la construirea `QueryClient`-ului, ca `staysFreshFor` sa
-   * se aplice. Merge fiindca fiecare query key incepe cu numele resursei, deci
-   * un default pus pe `["companies"]` acopera si lista, si detaliile, si
-   * sub-rutele ei.
-   */
   applyQueryDefaults(queryClient: QueryClient) {
     this.resourceNames.forEach((resourceName) => {
       queryClient.setQueryDefaults([resourceName], {
@@ -173,92 +109,40 @@ export abstract class DataHandler<TResource extends string> {
     });
   }
 
-  // --- 3. Planuri de scriere, la locul apelului ---------------------------
-  //
-  // Le pui in `mutation.meta.cache`. Fara niciunul, se aplica `writeFromResponse()`.
-
-  /**
-   * **Serverul a intors inregistrarea modificata** — o scriem peste cea din cache,
-   * fara niciun GET. Asta se intampla implicit, deci il scrii doar cand
-   * inregistrarea e ingropata intr-un raspuns compus:
-   *
-   * ```ts
-   * // POST /tasks/{taskId}/complete-call -> { task, deal, company, followUpTask }
-   * cache: DataHandler.writeFromResponse((response: CompleteCallTaskResponse) => response.task)
-   * ```
-   *
-   * Daca inregistrarea nu e nicaieri in cache — o creare, sau un rand de pe alta
-   * pagina — nu e o eroare: resursa se re-cere de la sine.
-   */
   static writeFromResponse<TResponse>(
     pickRecord?: (response: TResponse) => RecordWithId | null | undefined,
   ): WritePlan {
     return {
       pickRecord: (response) =>
-        DataHandler.toRecord(pickRecord ? pickRecord(response as TResponse) : response),
+        DataHandler.toRecord(
+          pickRecord ? pickRecord(response as TResponse) : response,
+        ),
       strategy: "fromResponse",
     };
   }
 
-  /**
-   * **Mai facem un GET** — pentru scrierile la care serverul calculeaza mai mult
-   * decat retrimite: un total recalculat, o sortare care se schimba, randuri care
-   * intra sau ies din filtrul curent.
-   *
-   * ```ts
-   * cache: DataHandler.reloadAfterWrite()                     // toata resursa
-   * cache: DataHandler.reloadAfterWrite(dataPage.queryKey)   // doar GET-ul paginii
-   * ```
-   */
   static reloadAfterWrite(...queryKeys: readonly QueryKey[]): WritePlan {
     return { queryKeys, strategy: "reload" };
   }
 
-  /**
-   * **Actualizare optimista** — scriem in cache din payload, *inainte* de raspuns.
-   * UI-ul se misca instant; daca cererea esueaza, cache-ul e pus la loc.
-   *
-   * ```ts
-   * cache: DataHandler.writeOptimistically(
-   *   (variables: { taskId: string; data: UpdateTaskNotesRequest }) => ({
-   *     id: variables.taskId,
-   *     notes: variables.data.notes,
-   *   }),
-   * )
-   * ```
-   *
-   * Trebuie sa intoarca `id`-ul: dupa el e gasita inregistrarea. Dupa raspuns,
-   * ce a ghicit pagina e inlocuit de adevarul serverului, nu lasat asa.
-   */
   static writeOptimistically<TVariables>(
     pickRecord: (variables: TVariables) => RecordWithId,
   ): WritePlan {
     return {
-      pickRecord: (variables) => DataHandler.toRecord(pickRecord(variables as TVariables)),
+      pickRecord: (variables) =>
+        DataHandler.toRecord(pickRecord(variables as TVariables)),
       strategy: "optimistic",
     };
   }
 
-  /**
-   * **Nu atingem cache-ul.** Pentru scrierile care nu tin date de afisat: un
-   * ping, o urmarire. Mesajele de succes si eroare merg mai departe.
-   */
   static skipCacheWrite(): WritePlan {
     return { strategy: "skip" };
   }
 
-  // --- 4. Ce poti suprascrie ----------------------------------------------
-
-  /**
-   * Chemat dupa fiecare scriere reusita. Implicit scrie o linie in consola, in
-   * afara de productie — primul loc in care te uiti cand o pagina nu se
-   * actualizeaza. Suprascrie-l ca sa schimbi formatul sau sa trimiti telemetrie.
-   */
   protected onWriteCompleted(event: WriteEvent<TResource>) {
-    // Citit prin `globalThis` ca biblioteca sa nu depinda de tipurile de Node:
-    // `process` nu exista in browser, iar bundler-ul il inlocuieste la build.
-    const nodeEnv = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env
-      ?.NODE_ENV;
+    const nodeEnv = (
+      globalThis as { process?: { env?: { NODE_ENV?: string } } }
+    ).process?.env?.NODE_ENV;
 
     if (nodeEnv === "production") {
       return;
@@ -272,116 +156,65 @@ export abstract class DataHandler<TResource extends string> {
     );
   }
 
-  /**
-   * Textul afisat cand o mutatie esueaza, daca pagina n-a dat `meta.errorMessage`.
-   * Suprascrie-l daca ai deja un tip de eroare normalizat, cu mesajul serverului.
-   */
   protected getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : "The request failed.";
   }
 
-  /**
-   * Daca operatia sterge. Numele ei e singura informatie disponibila: metoda
-   * HTTP nu ajunge pana aici.
-   *
-   * Conteaza, fiindca un `DELETE` intoarce de multe ori chiar inregistrarea
-   * stearsa — fara verificarea asta am scrie-o inapoi in lista in loc sa o
-   * scoatem. Suprascrie-l daca API-ul tau foloseste alt prefix (`remove`, `archive`).
-   */
   protected isDeleteOperation(operationName: string) {
     return operationName.startsWith("delete");
   }
 
-  // --- 5. Scrieri directe in cache (statice) ------------------------------
-  //
-  // Nicio decizie, niciun request, nicio regula: doar mecanica. Cine le cheama
-  // hotaraste cand si de ce.
-  //
-  // `writeRecordToCache` si `removeRecordFromCache` intorc query key-urile pe care
-  // chiar le-au schimbat. **Un array gol e informatie, nu esec**: inseamna ca
-  // inregistrarea nu era in cache, iar apelantul stie ca trebuie sa o ceara.
-
-  /**
-   * Pune inregistrarea peste cea din cache, in toate query-urile resursei:
-   * liste, liste paginate si detaliu, deodata.
-   *
-   * Fuziune, nu inlocuire: inregistrarea din lista are de obicei si campuri
-   * denormalizate pe care scrierea nu le retrimite
-   * (`CompanyListItem = Company & { primaryContactEmail, ... }`). Un replace brut
-   * ar goli coloane din tabel.
-   */
   static writeRecordToCache(
     queryClient: QueryClient,
     resourceName: string,
     record: RecordWithId,
   ) {
-    return DataHandler.updateMatchingQueries(queryClient, resourceName, (cached) =>
-      DataHandler.mapResponseRecords(cached, (records) =>
-        records.some((cachedRecord) => cachedRecord.id === record.id)
-          ? records.map((cachedRecord) =>
-              cachedRecord.id === record.id ? { ...cachedRecord, ...record } : cachedRecord,
-            )
-          : // Nu e aici — alta pagina, alt filtru. Lasam query-ul neatins.
-            undefined,
-      ),
+    return DataHandler.updateMatchingQueries(
+      queryClient,
+      resourceName,
+      (cached) =>
+        DataHandler.mapResponseRecords(cached, (records) =>
+          records.some((cachedRecord) => cachedRecord.id === record.id)
+            ? records.map((cachedRecord) =>
+                cachedRecord.id === record.id
+                  ? { ...cachedRecord, ...record }
+                  : cachedRecord,
+              )
+            : undefined,
+        ),
     );
   }
 
-  /**
-   * Scoate inregistrarea din listele din cache.
-   *
-   * Query-ul de detaliu (`["companies", id]`) ramane pe loc: nu are sens sa-l
-   * golesti, iar cine e pe pagina aceea navigheaza oricum in alta parte.
-   */
   static removeRecordFromCache(
     queryClient: QueryClient,
     resourceName: string,
     recordId: RecordWithId["id"],
   ) {
-    return DataHandler.updateMatchingQueries(queryClient, resourceName, (cached) =>
-      DataHandler.mapResponseRecords(cached, (records) => {
-        const remaining = records.filter((record) => record.id !== recordId);
+    return DataHandler.updateMatchingQueries(
+      queryClient,
+      resourceName,
+      (cached) =>
+        DataHandler.mapResponseRecords(cached, (records) => {
+          const remaining = records.filter((record) => record.id !== recordId);
 
-        return remaining.length === records.length ? undefined : remaining;
-      }),
+          return remaining.length === records.length ? undefined : remaining;
+        }),
     );
   }
 
-  /**
-   * Marcheaza resursa ca invechita, cu tot ce tine de ea — `["companies"]`
-   * prinde si lista, si detaliile, si sub-rutele.
-   *
-   * react-query re-cere doar query-urile montate acum; restul se reincarca data
-   * viitoare cand o pagina le cere. Nu asteptam raspunsul, ca UI-ul sa
-   * reactioneze imediat dupa scriere.
-   */
   static invalidateResource(queryClient: QueryClient, resourceName: string) {
     void queryClient.invalidateQueries({ queryKey: [resourceName] });
   }
 
-  /**
-   * Acelasi lucru, dar tintit: doar query-urile date, nu toata resursa. Cheia
-   * vine de la hook-ul generat (`dataPage.queryKey`), deci re-cererea atinge
-   * exact GET-ul care alimenteaza pagina — cu filtrele ei cu tot.
-   */
-  static invalidateQueries(queryClient: QueryClient, queryKeys: readonly QueryKey[]) {
+  static invalidateQueries(
+    queryClient: QueryClient,
+    queryKeys: readonly QueryKey[],
+  ) {
     queryKeys.forEach((queryKey) => {
       void queryClient.invalidateQueries({ queryKey });
     });
   }
 
-  // --- 6. Citirea raspunsurilor (statice) ---------------------------------
-  //
-  // Un raspuns are una din trei forme:
-  //
-  //   lista simpla    `GET /deals`          -> `Deal[]`
-  //   lista paginata  `GET /companies`      -> `{ data: Company[], total, totalPages, ... }`
-  //   o inregistrare  `GET /companies/{id}` -> `Company`
-  //
-  // Metodele de aici si `mapResponseRecords` sunt singurul loc care cunoaste cele
-  // trei forme. Daca API-ul mai adauga una, se schimba doar aici.
-
-  /** Inregistrarile dintr-un raspuns, indiferent de forma. */
   static readRecords(response: unknown): RecordWithId[] {
     if (Array.isArray(response)) {
       return response;
@@ -398,10 +231,6 @@ export abstract class DataHandler<TResource extends string> {
     return record ? [record] : [];
   }
 
-  /**
-   * Numerele de paginare, cand raspunsul le are. Lista simpla n-are: atunci
-   * `total` e lungimea ei si e o singura pagina, ceea ce e adevarat.
-   */
   static readPageInfo(response: unknown) {
     const records = DataHandler.readRecords(response);
     const paged = (response ?? {}) as Partial<
@@ -419,36 +248,17 @@ export abstract class DataHandler<TResource extends string> {
     };
   }
 
-  // --- 7. Introspectie ----------------------------------------------------
-
-  /** Regulile efective ale unei resurse: `defaultRules` completat cu `rules`. */
   getRulesFor(resourceName: TResource) {
     return { ...this.defaultRules, ...this.rules[resourceName] };
   }
 
-  /**
-   * `"/companies/{id}"` sau `["companies", params]` -> `"companies"`.
-   * `undefined` daca primul segment nu e in `resourceNames`, si atunci scrierea
-   * nu atinge cache-ul.
-   */
   resolveResourceName(source: string | QueryKey): TResource | undefined {
-    const [first] = typeof source === "string" ? source.split("/").filter(Boolean) : source;
+    const [first] =
+      typeof source === "string" ? source.split("/").filter(Boolean) : source;
 
     return this.resourceNames.find((resourceName) => resourceName === first);
   }
 
-  // --- 8. Inima: ce se intampla in jurul unei scrieri ----------------------
-
-  /**
-   * Inainte de cerere, pentru `writeOptimistically`: scriem in cache ce stim din
-   * payload, ca UI-ul sa se miste instant.
-   *
-   * Copia de siguranta sta intr-un `WeakMap` cheiat pe chiar obiectul de
-   * variabile, nu in contextul mutatiei — asa `onMutate`-ul paginii isi pastreaza
-   * contextul, iar doua scrieri paralele nu se incurca. Cand variabilele nu sunt
-   * un obiect n-avem pe ce cheia, deci sarim peste partea optimista; sincronizarea
-   * de dupa raspuns merge oricum.
-   */
   private async applyOptimisticWrite(
     queryClient: QueryClient,
     resourceName: TResource,
@@ -465,8 +275,6 @@ export abstract class DataHandler<TResource extends string> {
     if (!record) {
       return;
     }
-
-    // Oprim GET-urile in zbor: un raspuns sosit dupa scrierea noastra ar sterge-o.
     await queryClient.cancelQueries({ queryKey: [resourceName] });
 
     const snapshot = DataHandler.snapshotResource(queryClient, resourceName);
@@ -479,7 +287,6 @@ export abstract class DataHandler<TResource extends string> {
     }
   }
 
-  /** Copia de siguranta, scoasa din evidenta: se foloseste o singura data. */
   private takeOptimisticWrite(variables: unknown) {
     if (typeof variables !== "object" || variables === null) {
       return undefined;
@@ -491,22 +298,6 @@ export abstract class DataHandler<TResource extends string> {
     return snapshot;
   }
 
-  /**
-   * Dupa raspuns. Trei cai, dupa planul cerut de call site:
-   *
-   *  1. `fromResponse` — serverul a intors inregistrarea -> o scriem peste cea
-   *     veche, zero request-uri
-   *  2. `reload`       — o cerem de la server, tintit sau pe toata resursa
-   *  3. `optimistic`   — cache-ul e deja scris; raspunsul, daca e o inregistrare,
-   *     il confirma cu adevarul serverului
-   *
-   * Peste toate, plasa de siguranta: daca n-am putut schimba nimic in cache — o
-   * creare (id nou, care nu e in nicio lista), un raspuns compus, o inregistrare
-   * din afara paginii incarcate — resursa se re-cere. Nu e un caz de eroare.
-   *
-   * Si, mereu, resursele din `alsoChanges`: pe ele serverul le-a schimbat, iar
-   * raspunsul nu spune cum.
-   */
   private runWritePlan({
     operationName,
     plan,
@@ -543,15 +334,23 @@ export abstract class DataHandler<TResource extends string> {
     const updatedQueryKeys = !record
       ? []
       : deletes
-        ? DataHandler.removeRecordFromCache(queryClient, resourceName, record.id)
+        ? DataHandler.removeRecordFromCache(
+            queryClient,
+            resourceName,
+            record.id,
+          )
         : DataHandler.writeRecordToCache(queryClient, resourceName, record);
 
     const reloadedQueryKeys = plan.strategy === "reload" ? plan.queryKeys : [];
     const changedCache =
-      updatedQueryKeys.length > 0 || wasOptimistic || reloadedQueryKeys.length > 0;
+      updatedQueryKeys.length > 0 ||
+      wasOptimistic ||
+      reloadedQueryKeys.length > 0;
 
     const { alsoChanges } = this.getRulesFor(resourceName);
-    const reloadedResources = changedCache ? alsoChanges : [resourceName, ...alsoChanges];
+    const reloadedResources = changedCache
+      ? alsoChanges
+      : [resourceName, ...alsoChanges];
 
     DataHandler.invalidateQueries(queryClient, reloadedQueryKeys);
     reloadedResources.forEach((reloaded) =>
@@ -561,7 +360,11 @@ export abstract class DataHandler<TResource extends string> {
     this.onWriteCompleted({
       operationName,
       outcome:
-        updatedQueryKeys.length || wasOptimistic ? (deletes ? "removed" : "merged") : "reloaded",
+        updatedQueryKeys.length || wasOptimistic
+          ? deletes
+            ? "removed"
+            : "merged"
+          : "reloaded",
       reloadedQueryKeys,
       reloadedResources,
       resourceName,
@@ -571,28 +374,14 @@ export abstract class DataHandler<TResource extends string> {
     });
   }
 
-  /**
-   * Cheiat pe obiectul de variabile al mutatiei, deci se curata singur: cand
-   * mutatia se termina, nimeni nu mai tine obiectul si intrarea dispare.
-   */
   private readonly optimisticWrites = new WeakMap<object, CacheSnapshot>();
 
-  // --- 9. Ajutoare statice private ----------------------------------------
-
-  /** Ce se intampla cand call site-ul n-a cerut nimic. */
   private static readonly defaultWritePlan = DataHandler.writeFromResponse();
 
-  /**
-   * Inregistrarea de scris in cache, luata din raspuns. `undefined` pentru
-   * `reload`, unde raspunsul e ignorat din principiu, si pentru raspunsurile din
-   * care nu se poate scoate una.
-   */
   private static readResponseRecord(plan: WritePlan, response: unknown) {
     switch (plan.strategy) {
       case "fromResponse":
         return plan.pickRecord(response);
-      // Cache-ul e deja scris din payload; raspunsul, daca e o inregistrare, il
-      // corecteaza cu ce a calculat serverul.
       case "optimistic":
         return DataHandler.toRecord(response);
       default:
@@ -600,11 +389,6 @@ export abstract class DataHandler<TResource extends string> {
     }
   }
 
-  /**
-   * Valoarea, daca e chiar o inregistrare. `undefined` pentru raspunsurile
-   * compuse (`{ task, deal, company }`) si cele de tip raport
-   * (`{ imported, skipped }`) — n-au `id` la nivelul de sus.
-   */
   private static toRecord(value: unknown): RecordWithId | undefined {
     const id = (value as RecordWithId | undefined)?.id;
 
@@ -613,11 +397,6 @@ export abstract class DataHandler<TResource extends string> {
       : undefined;
   }
 
-  /**
-   * Rescrie inregistrarile din raspuns pastrandu-i forma. `mapRecords` intoarce
-   * `undefined` pentru "nimic de schimbat aici", si atunci intoarcem si noi
-   * `undefined` — la fel ca un updater react-query care nu modifica nimic.
-   */
   private static mapResponseRecords(
     response: unknown,
     mapRecords: (records: RecordWithId[]) => RecordWithId[] | undefined,
@@ -643,13 +422,6 @@ export abstract class DataHandler<TResource extends string> {
     return record && mapRecords([record])?.[0];
   }
 
-  /**
-   * Trece prin query-urile resursei si le rescrie pe cele chiar schimbate.
-   *
-   * Parcurgem cache-ul explicit, in loc de `setQueriesData`, fiindca updater-ul
-   * acela nu stie pe ce query key lucreaza — iar fara key-uri n-am putea spune ce
-   * s-a schimbat, si actualizarea ar fi invizibila la debug.
-   */
   private static updateMatchingQueries(
     queryClient: QueryClient,
     resourceName: string,
@@ -657,7 +429,9 @@ export abstract class DataHandler<TResource extends string> {
   ) {
     const changedQueryKeys: QueryKey[] = [];
 
-    for (const query of queryClient.getQueryCache().findAll({ queryKey: [resourceName] })) {
+    for (const query of queryClient
+      .getQueryCache()
+      .findAll({ queryKey: [resourceName] })) {
       const nextResponse = getNextResponse(query.state.data);
 
       if (nextResponse === undefined) {
@@ -671,30 +445,30 @@ export abstract class DataHandler<TResource extends string> {
     return changedQueryKeys;
   }
 
-  /** Copiaza starea query-urilor resursei, ca sa poata fi pusa la loc. */
-  private static snapshotResource(queryClient: QueryClient, resourceName: string): CacheSnapshot {
+  private static snapshotResource(
+    queryClient: QueryClient,
+    resourceName: string,
+  ): CacheSnapshot {
     return queryClient
       .getQueryCache()
       .findAll({ queryKey: [resourceName] })
       .map((query) => [query.queryKey, query.state.data] as const);
   }
 
-  /**
-   * Pune inapoi ce a copiat `snapshotResource`. Nu verifica daca intre timp
-   * altcineva a scris peste: e compromisul standard al actualizarilor optimiste
-   * din react-query. In practica fereastra e cat o cerere esuata.
-   */
-  private static restoreSnapshot(queryClient: QueryClient, snapshot: CacheSnapshot) {
-    snapshot.forEach(([queryKey, data]) => queryClient.setQueryData(queryKey, data));
+  private static restoreSnapshot(
+    queryClient: QueryClient,
+    snapshot: CacheSnapshot,
+  ) {
+    snapshot.forEach(([queryKey, data]) =>
+      queryClient.setQueryData(queryKey, data),
+    );
   }
 
-  /**
-   * `meta` e tipat de aplicatie, prin augmentarea lui `Register`. Aici nu ne putem
-   * baza pe asta — e `Record<string, unknown>` — deci citim defensiv doar
-   * campurile care ne intereseaza.
-   */
   private static extractWriteMeta(meta: unknown) {
-    const { cache, errorMessage, successMessage } = (meta ?? {}) as Record<string, unknown>;
+    const { cache, errorMessage, successMessage } = (meta ?? {}) as Record<
+      string,
+      unknown
+    >;
     const strategy = (cache as WritePlan | undefined)?.strategy;
     const isWritePlan =
       strategy === "fromResponse" ||
@@ -705,7 +479,8 @@ export abstract class DataHandler<TResource extends string> {
     return {
       cache: isWritePlan ? (cache as WritePlan) : undefined,
       errorMessage: typeof errorMessage === "string" ? errorMessage : undefined,
-      successMessage: typeof successMessage === "string" ? successMessage : undefined,
+      successMessage:
+        typeof successMessage === "string" ? successMessage : undefined,
     };
   }
 }
