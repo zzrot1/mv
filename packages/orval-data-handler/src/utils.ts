@@ -2,15 +2,6 @@ import type { QueryKey } from "@tanstack/react-query";
 
 export type RecordWithId = { id: string | number };
 
-type DefinedResponse<T> = NonNullable<T>;
-
-export type RecordsOf<TResponse> =
-  [DefinedResponse<TResponse>] extends [readonly (infer TRecord)[]]
-    ? TRecord[]
-    : [DefinedResponse<TResponse>] extends [{ data: readonly (infer TRecord)[] }]
-      ? TRecord[]
-      : DefinedResponse<TResponse>[];
-
 export type ResourceRules<TResource extends string> = Partial<
   Record<TResource, { staysFreshFor?: number; alsoChanges?: readonly TResource[] }>
 >;
