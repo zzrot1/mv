@@ -17,7 +17,7 @@
   --page-max: 1680px;
   --gutter: clamp(16px, 3vw, 48px);
   --section-y: clamp(48px, 7vw, 112px);
-  --header-height: 76px;
+  --header-height: 84px;
 
   --step-0: clamp(13px, 0.82vw, 15px);
   --step-1: clamp(15px, 1vw, 18px);

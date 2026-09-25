@@ -143,7 +143,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       <div className={styles.loginCard}>
         <div className={styles.form}>
           <div className={styles.cardHeader}>
-            <a className={styles.logoLink} href="#" aria-label="gestalten home">
+            <a className={styles.logoLink} href="#" aria-label="Home">
               <span className={styles.logoMark}>
                 <BrandMarkIcon />
               </span>
@@ -194,19 +194,25 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     <div className={styles.loginCard}>
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.cardHeader}>
-          <a className={styles.logoLink} href="#" aria-label="gestalten home">
+          <a className={styles.logoLink} href="#" aria-label="Home">
             <span className={styles.logoMark}>
               <BrandMarkIcon />
             </span>
           </a>
           <h1 className={styles.title}>
-            {isRegisterMode ? "Create your account" : "Welcome to gestalten"}
+            {isRegisterMode
+              ? "Create your account"
+              : "Welcome to Books & Culture"}
           </h1>
           <p className={styles.description}>
-            {isRegisterMode ? "Already have an account? " : "Don't have an account? "}
+            {isRegisterMode
+              ? "Already have an account? "
+              : "Don't have an account? "}
             <button
               className={styles.inlineButton}
-              onClick={() => handleAuthModeChange(isRegisterMode ? "login" : "register")}
+              onClick={() =>
+                handleAuthModeChange(isRegisterMode ? "login" : "register")
+              }
               type="button"
             >
               {isRegisterMode ? "Login" : "Sign up"}
@@ -273,8 +279,12 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         </div>
 
         <div className={styles.socialGrid}>
-          <LoginSocialButton icon={<AppleIcon />}>Continue with Apple</LoginSocialButton>
-          <LoginSocialButton icon={<GoogleIcon />}>Continue with Google</LoginSocialButton>
+          <LoginSocialButton icon={<AppleIcon />}>
+            Continue with Apple
+          </LoginSocialButton>
+          <LoginSocialButton icon={<GoogleIcon />}>
+            Continue with Google
+          </LoginSocialButton>
         </div>
       </form>
 

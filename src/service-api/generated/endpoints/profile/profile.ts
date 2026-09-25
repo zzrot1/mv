@@ -30,7 +30,7 @@ import type {
 
 import { apiFetch } from '../../../mutator/api-fetch';
 import type { ErrorType , BodyType } from '../../../mutator/api-fetch';
-import { useApiMutationOptions } from '../../../../core/cache/mutation-options';
+import { useApiMutationOptions } from '../../../mutator/mutation-options';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];

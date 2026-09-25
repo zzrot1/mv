@@ -79,7 +79,7 @@ function FooterColumnGroup({ column }: { column: FooterColumn }) {
 }
 
 export function Footer({
-  brandLabel = "gestalten",
+  brandLabel = "Books & Culture",
   description = "Coffee table books and visual culture for contemporary living.",
   columns = defaultColumns,
 }: FooterProps) {

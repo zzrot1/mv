@@ -1,4 +1,5 @@
-import { Header } from "@/components";
+import { Footer, FooterBenefits, Header } from "@/components";
+import styles from "./layout.module.css";
 
 type NotRegisteredLayoutProps = {
   children: React.ReactNode;
@@ -6,9 +7,11 @@ type NotRegisteredLayoutProps = {
 
 export default function NotRegisteredLayout({ children }: NotRegisteredLayoutProps) {
   return (
-    <>
+    <div className={styles.layout}>
       <Header />
-      {children}
-    </>
+      <main className={styles.layout__content}>{children}</main>
+      <FooterBenefits />
+      <Footer />
+    </div>
   );
 }

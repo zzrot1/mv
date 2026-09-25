@@ -1,0 +1,84 @@
+.grid-small-background {
+  --grid-small-background-surface: var(--color-white);
+  --grid-small-background-foreground: var(--color-ink);
+  --grid-small-background-line: #e4e4e7;
+  --grid-small-background-min-height: 50rem;
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: var(--grid-small-background-min-height);
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--grid-small-background-surface);
+  color: var(--grid-small-background-foreground);
+}
+
+.grid-small-background[data-theme="dark"] {
+  --grid-small-background-surface: var(--color-black);
+  --grid-small-background-foreground: var(--color-white);
+  --grid-small-background-line: #262626;
+}
+
+.grid-small-background[data-theme="light"] {
+  --grid-small-background-surface: var(--color-white);
+  --grid-small-background-foreground: var(--color-ink);
+  --grid-small-background-line: #e4e4e7;
+}
+
+.grid-small-background__grid {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image:
+    linear-gradient(
+      to right,
+      var(--grid-small-background-line) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      var(--grid-small-background-line) 1px,
+      transparent 1px
+    );
+  background-size: 20px 20px;
+}
+
+.grid-small-background__fade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--grid-small-background-surface);
+  mask-image: radial-gradient(ellipse at center, transparent 20%, black);
+}
+
+.grid-small-background__content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--page-max));
+  padding: clamp(64px, 9vw, 144px) var(--gutter);
+}
+
+.grid-small-background__demo-title {
+  width: fit-content;
+  margin-inline: auto;
+  padding-block: 32px;
+  background: linear-gradient(to bottom, #e5e5e5, #737373);
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(40px, 7vw, 112px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .grid-small-background:not([data-theme]) {
+    --grid-small-background-surface: var(--color-black);
+    --grid-small-background-foreground: var(--color-white);
+    --grid-small-background-line: #262626;
+  }
+}

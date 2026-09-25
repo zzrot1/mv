@@ -24,12 +24,14 @@ import type {
   RegisterBody,
   RegisterResponse,
   ResendVerificationBody,
-  ResetPasswordBody
+  ResetPasswordBody,
+  ResetPasswordParams,
+  VerifyEmailParams
 } from '../../models';
 
 import { apiFetch } from '../../../mutator/api-fetch';
 import type { ErrorType , BodyType } from '../../../mutator/api-fetch';
-import { useApiMutationOptions } from '../../../../core/cache/mutation-options';
+import { useApiMutationOptions } from '../../../mutator/mutation-options';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -499,17 +501,25 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
-    export const getResetPasswordUrl = () => {
+    export const getResetPasswordUrl = (params: ResetPasswordParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
-  
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/auth/reset-password`
+  return stringifiedParams.length > 0 ? `/auth/reset-password?${stringifiedParams}` : `/auth/reset-password`
 }
 
-export const resetPassword = async (resetPasswordBody: ResetPasswordBody, options?: RequestInit): Promise<void> => {
+export const resetPassword = async (resetPasswordBody: ResetPasswordBody,
+    params: ResetPasswordParams, options?: RequestInit): Promise<void> => {
   
-  return apiFetch<void>(getResetPasswordUrl(),
+  return apiFetch<void>(getResetPasswordUrl(params),
   {      
     ...options,
     method: 'POST',
@@ -523,8 +533,8 @@ export const resetPassword = async (resetPasswordBody: ResetPasswordBody, option
 
 
 export const useResetPasswordMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,{data: BodyType<ResetPasswordBody>}, TContext>, request?: SecondParameter<typeof apiFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,{data: BodyType<ResetPasswordBody>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,{data: BodyType<ResetPasswordBody>;params: ResetPasswordParams}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,{data: BodyType<ResetPasswordBody>;params: ResetPasswordParams}, TContext> => {
 
 const mutationKey = ['resetPassword'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -536,10 +546,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetPassword>>, {data: BodyType<ResetPasswordBody>}> = (props) => {
-          const {data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetPassword>>, {data: BodyType<ResetPasswordBody>;params: ResetPasswordParams}> = (props) => {
+          const {data,params} = props ?? {};
 
-          return  resetPassword(data,requestOptions)
+          return  resetPassword(data,params,requestOptions)
         }
 
         const customOptions = useApiMutationOptions({...mutationOptions, mutationFn}, { url: `/auth/reset-password` }, { operationId: 'ResetPassword', operationName: 'resetPassword' });
@@ -552,11 +562,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type ResetPasswordMutationError = ErrorType<unknown>
 
     export const useResetPassword = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,{data: BodyType<ResetPasswordBody>}, TContext>, request?: SecondParameter<typeof apiFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,{data: BodyType<ResetPasswordBody>;params: ResetPasswordParams}, TContext>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof resetPassword>>,
         TError,
-        {data: BodyType<ResetPasswordBody>},
+        {data: BodyType<ResetPasswordBody>;params: ResetPasswordParams},
         TContext
       > => {
 
@@ -628,17 +638,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
-    export const getVerifyEmailUrl = () => {
+    export const getVerifyEmailUrl = (params: VerifyEmailParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
-  
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/auth/verify-email`
+  return stringifiedParams.length > 0 ? `/auth/verify-email?${stringifiedParams}` : `/auth/verify-email`
 }
 
-export const verifyEmail = async ( options?: RequestInit): Promise<void> => {
+export const verifyEmail = async (params: VerifyEmailParams, options?: RequestInit): Promise<void> => {
   
-  return apiFetch<void>(getVerifyEmailUrl(),
+  return apiFetch<void>(getVerifyEmailUrl(params),
   {      
     ...options,
     method: 'POST'
@@ -651,8 +668,8 @@ export const verifyEmail = async ( options?: RequestInit): Promise<void> => {
 
 
 export const useVerifyEmailMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verifyEmail>>, TError,void, TContext>, request?: SecondParameter<typeof apiFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof verifyEmail>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verifyEmail>>, TError,{params: VerifyEmailParams}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof verifyEmail>>, TError,{params: VerifyEmailParams}, TContext> => {
 
 const mutationKey = ['verifyEmail'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -664,10 +681,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof verifyEmail>>, void> = () => {
-          
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof verifyEmail>>, {params: VerifyEmailParams}> = (props) => {
+          const {params} = props ?? {};
 
-          return  verifyEmail(requestOptions)
+          return  verifyEmail(params,requestOptions)
         }
 
         const customOptions = useApiMutationOptions({...mutationOptions, mutationFn}, { url: `/auth/verify-email` }, { operationId: 'VerifyEmail', operationName: 'verifyEmail' });
@@ -680,11 +697,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type VerifyEmailMutationError = ErrorType<unknown>
 
     export const useVerifyEmail = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verifyEmail>>, TError,void, TContext>, request?: SecondParameter<typeof apiFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verifyEmail>>, TError,{params: VerifyEmailParams}, TContext>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof verifyEmail>>,
         TError,
-        void,
+        {params: VerifyEmailParams},
         TContext
       > => {
 

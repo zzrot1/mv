@@ -6,8 +6,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-import { apiDataHandler } from "@/core/cache/api-data-handler";
+import { apiDataHandler } from "@/service-api/mutator/api-data-handler";
 
 type QueryProviderProps = {
   children: React.ReactNode;

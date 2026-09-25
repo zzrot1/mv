@@ -3,7 +3,7 @@
 import type { UseMutationOptions } from "@tanstack/react-query";
 import { useDataHandlerMutationOptions } from "orval-data-handler";
 
-import { apiDataHandler, type ApiMutationMeta } from "@/core/cache/api-data-handler";
+import { apiDataHandler, type ApiMutationMeta } from "./api-data-handler";
 
 declare module "@tanstack/react-query" {
   interface Register {

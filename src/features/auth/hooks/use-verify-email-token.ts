@@ -7,9 +7,7 @@ import { useVerifyEmail } from "@/service-api/generated/endpoints/auth/auth";
 
 export function useVerifyEmailToken(token?: string) {
   const hasSubmitted = useRef(false);
-  const mutation = useVerifyEmail({
-    request: token ? { params: { token } } : undefined,
-  });
+  const mutation = useVerifyEmail();
 
   useEffect(() => {
     if (!token || hasSubmitted.current) {
@@ -17,7 +15,7 @@ export function useVerifyEmailToken(token?: string) {
     }
 
     hasSubmitted.current = true;
-    mutation.mutate();
+    mutation.mutate({ params: { token } });
   }, [mutation, token]);
 
   return {
@@ -32,7 +30,7 @@ export function useVerifyEmailToken(token?: string) {
       }
 
       mutation.reset();
-      mutation.mutate();
+      mutation.mutate({ params: { token } });
     },
   };
 }

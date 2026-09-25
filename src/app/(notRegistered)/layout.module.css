@@ -1,0 +1,15 @@
+.layout {
+  --header-search-height: 0px;
+
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.layout:has([data-search-open="true"]) {
+  --header-search-height: 84px;
+}
+
+.layout__content {
+  flex: 1;
+}

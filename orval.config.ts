@@ -21,7 +21,7 @@ export default defineConfig({
         },
         query: {
           mutationOptions: {
-            path: "./src/core/cache/mutation-options.ts",
+            path: "./src/service-api/mutator/mutation-options.ts",
             name: "useApiMutationOptions",
           },
           shouldSplitQueryKey: true,

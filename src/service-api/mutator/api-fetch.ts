@@ -6,28 +6,18 @@ import {
   type ApiError,
 } from "orval-data-handler";
 
-type ApiFetchOptions = Omit<RequestInit, "body"> & {
-  params?: Record<string, unknown>;
-  data?: unknown;
-  body?: BodyInit | null;
-};
-
 export type ErrorType<ErrorData = unknown> = ApiError & { body?: ErrorData };
 export type BodyType<BodyData = unknown> = BodyData;
 
 export async function apiFetch<TResponse>(
   url: string,
-  options: ApiFetchOptions = {},
+  options: RequestInit = {},
 ): Promise<TResponse> {
   let response = await sendRequest(url, options);
 
-  // Access token-ul traieste ~30 min. Cand expira, il reinnoim din cookie-ul
-  // httpOnly de refresh si reluam cererea o singura data, ca utilizatorul sa
-  // nu fie deconectat la fiecare expirare.
-  if (response.status === 401 && !isAuthEndpoint(url)) {
-    const renewed = await renewAccessToken();
 
-    if (renewed) {
+  if (response.status === 401 && !isAuthEndpoint(url)) {
+    if (await renewAccessToken()) {
       response = await sendRequest(url, options);
     }
   }
@@ -36,33 +26,23 @@ export async function apiFetch<TResponse>(
     throw await toApiError(response);
   }
 
-  if (response.status === 204) {
-    return undefined as TResponse;
-  }
+  const body = await response.text();
 
-  return (await response.json()) as TResponse;
+  return (body ? JSON.parse(body) : undefined) as TResponse;
 }
 
-function sendRequest(url: string, options: ApiFetchOptions) {
-  return fetch(getRequestUrl(url, options.params), {
-    body: getRequestBody(options),
+function sendRequest(url: string, options: RequestInit) {
+  return fetch(getRequestUrl(url), {
+    ...options,
     credentials: "include",
-    headers: getHeaders(options),
-    method: options.method ?? "GET",
-    signal: options.signal,
+    headers: withAuthorization(options.headers),
   });
 }
 
-/** Rutele de auth nu se reincearca: un 401 de la ele e raspunsul real. */
 function isAuthEndpoint(url: string) {
   return url.startsWith("/auth/");
 }
 
-/**
- * O singura reinnoire in zbor, indiferent cate cereri primesc 401 simultan:
- * refresh token-ul se roteste la fiecare folosire, deci doua apeluri paralele
- * s-ar invalida reciproc.
- */
 let renewal: Promise<boolean> | null = null;
 
 function renewAccessToken(): Promise<boolean> {
@@ -80,9 +60,7 @@ function renewAccessToken(): Promise<boolean> {
         return false;
       }
 
-      const tokens = (await response.json()) as {
-        access?: { token?: string };
-      };
+      const tokens = (await response.json()) as { access?: { token?: string } };
 
       setAccessToken(tokens.access?.token ?? null);
       return Boolean(tokens.access?.token);
@@ -97,64 +75,19 @@ function renewAccessToken(): Promise<boolean> {
   return renewal;
 }
 
-function getRequestUrl(url: string, params?: Record<string, unknown>) {
-  const requestUrl = new URL(joinPath(getApiBaseUrl(), url));
+function getRequestUrl(url: string) {
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
 
-  Object.entries(params ?? {}).forEach(([key, value]) => {
-    if (value === undefined || value === null) {
-      return;
-    }
-
-    if (Array.isArray(value)) {
-      value.forEach((item) => requestUrl.searchParams.append(key, String(item)));
-      return;
-    }
-
-    requestUrl.searchParams.set(key, String(value));
-  });
-
-  return requestUrl.toString();
+  return `${base.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
 }
 
-function getApiBaseUrl() {
-  return process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
-}
-
-function joinPath(base: string, path: string) {
-  return `${base.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
-}
-
-function getHeaders(options: ApiFetchOptions) {
-  const headers = new Headers(options.headers);
-  const body = options.body ?? options.data;
-
-  if (body && !(body instanceof FormData) && !headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json");
-  }
-
+function withAuthorization(source: HeadersInit | undefined) {
+  const headers = new Headers(source);
   const accessToken = getAccessToken();
+
   if (accessToken && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
   return headers;
-}
-
-function getRequestBody(options: ApiFetchOptions) {
-  const body = options.body ?? options.data;
-
-  if (!body) {
-    return undefined;
-  }
-
-  if (
-    typeof body === "string" ||
-    body instanceof Blob ||
-    body instanceof FormData ||
-    body instanceof URLSearchParams
-  ) {
-    return body;
-  }
-
-  return JSON.stringify(body);
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Roboto } from "next/font/google";
+import { Roboto } from "next/font/google";
 import { AppProviders } from "@/providers/app-providers";
 import "./globals.css";
 

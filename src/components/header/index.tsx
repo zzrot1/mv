@@ -206,7 +206,10 @@ export function Header({
   }, [isSearchOpen]);
 
   return (
-    <header className={styles.header}>
+    <header
+      className={styles.header}
+      data-search-open={isSearchOpen ? "true" : undefined}
+    >
       <Announcement message={announcement} />
       <div className={styles["header__bar"]}>
         <Navigation
