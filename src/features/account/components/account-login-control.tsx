@@ -1,29 +1,19 @@
-"use client";
+import Link from "next/link";
 
-import { LoginModal } from "@/features/auth/components/login-modal";
-import { useLoginModal } from "@/features/auth/hooks/use-login-modal";
-
-import { AccountAvatar } from "./account-avatar";
 import styles from "../styles/account-page.module.css";
 
-type AccountLoginControlProps = {
-  initials: string;
-};
-
-export function AccountLoginControl({ initials }: AccountLoginControlProps) {
-  const { closeLoginModal, isOpen, openLoginModal } = useLoginModal();
-
+export function AccountLoginControl() {
   return (
-    <>
-      <button
-        aria-label="Open login modal"
-        className={styles.avatarButton}
-        onClick={openLoginModal}
-        type="button"
-      >
-        <AccountAvatar initials={initials} />
-      </button>
-      <LoginModal isOpen={isOpen} onClose={closeLoginModal} />
-    </>
+    <Link aria-label="Back to home" className={styles.backButton} href="/">
+      <svg aria-hidden="true" fill="none" height="24" viewBox="0 0 24 24" width="24">
+        <path
+          d="M15.5 5.5 9 12l6.5 6.5"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.6"
+        />
+      </svg>
+    </Link>
   );
 }

@@ -1,4 +1,20 @@
 .overlay {
+  --login-surface: var(--color-white);
+  --login-background: #f3f4f2;
+  --login-border: #dedfdb;
+  --login-foreground: #101010;
+  --login-muted: #697074;
+  --login-soft: #f8f9f7;
+  --login-input: var(--color-white);
+  --login-danger-background: #fff4f2;
+  --login-danger-border: #f0c7c1;
+  --login-danger: #9f2f22;
+  --login-success-background: #f0faf3;
+  --login-success-border: #bedac7;
+  --login-success: #23713a;
+  --login-primary: #111111;
+  --login-primary-foreground: #ffffff;
+
   position: fixed;
   inset: 0;
   z-index: 50;
@@ -22,10 +38,12 @@
   width: min(100%, 470px);
   max-height: min(760px, calc(100vh - 40px));
   overflow: auto;
-  border: 1px solid #dedfdb;
+  border: 1px solid var(--login-border);
   border-radius: 18px;
-  background: #ffffff;
+  background: var(--login-surface);
   box-shadow: 0 24px 80px rgb(0 0 0 / 20%);
+  color: var(--login-foreground);
+  font-family: var(--font-sans);
 }
 
 .closeButton {
@@ -37,10 +55,10 @@
   width: 36px;
   height: 36px;
   place-items: center;
-  border: 1px solid #e3e4e0;
+  border: 1px solid var(--login-border);
   border-radius: 50%;
-  background: #ffffff;
-  color: #111111;
+  background: var(--login-surface);
+  color: var(--login-foreground);
 }
 
 .loginCard {
@@ -76,39 +94,41 @@
   height: 36px;
   place-items: center;
   border-radius: 10px;
-  color: #111111;
+  color: var(--login-foreground);
 }
 
 .title {
-  color: #050505;
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.22;
+  color: var(--login-foreground);
+  font-family: var(--font-sans);
+  font-size: 23px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 
 .description,
 .terms {
-  color: #6e7478;
+  color: var(--login-muted);
   font-size: 14px;
   line-height: 1.45;
 }
 
 .description a,
 .terms a {
-  color: #050505;
+  color: var(--login-foreground);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .inlineButton {
-  color: #050505;
+  color: var(--login-foreground);
   font: inherit;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .strongText {
-  color: #050505;
+  color: var(--login-foreground);
   font-weight: 500;
 }
 
@@ -118,7 +138,7 @@
 }
 
 .label {
-  color: #111111;
+  color: var(--login-foreground);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.2;
@@ -127,34 +147,36 @@
 .input {
   width: 100%;
   height: 44px;
-  border: 1px solid #d8dbd6;
+  border: 1px solid var(--login-border);
   border-radius: 10px;
-  background: #ffffff;
-  color: #050505;
+  background: var(--login-input);
+  color: var(--login-foreground);
   padding: 0 13px;
   font-size: 15px;
+  font-family: var(--font-sans);
   line-height: 1;
+  outline: 0;
 }
 
 .input::placeholder {
-  color: #8a8f92;
+  color: color-mix(in srgb, var(--login-muted) 76%, transparent);
 }
 
 .errorMessage,
 .successMessage {
-  border: 1px solid #f0c7c1;
+  border: 1px solid var(--login-danger-border);
   border-radius: 10px;
-  background: #fff4f2;
-  color: #9f2f22;
+  background: var(--login-danger-background);
+  color: var(--login-danger);
   font-size: 14px;
   line-height: 1.35;
   padding: 10px 12px;
 }
 
 .successMessage {
-  border-color: #bedac7;
-  background: #f0faf3;
-  color: #23713a;
+  border-color: var(--login-success-border);
+  background: var(--login-success-background);
+  color: var(--login-success);
 }
 
 .primaryButton,
@@ -167,6 +189,7 @@
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
+  font-family: var(--font-sans);
   line-height: 1.2;
   transition:
     background var(--duration-fast) var(--ease-out),
@@ -176,8 +199,8 @@
 
 .primaryButton {
   width: 100%;
-  background: #111111;
-  color: #ffffff;
+  background: var(--login-primary);
+  color: var(--login-primary-foreground);
 }
 
 .primaryButton:disabled {
@@ -189,7 +212,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #767b7e;
+  color: var(--login-muted);
   font-size: 13px;
   line-height: 1;
 }
@@ -198,7 +221,7 @@
 .separator::after {
   height: 1px;
   flex: 1;
-  background: #e0e2de;
+  background: var(--login-border);
   content: "";
 }
 
@@ -209,9 +232,9 @@
 }
 
 .socialButton {
-  border: 1px solid #d8dbd6;
-  background: #ffffff;
-  color: #111111;
+  border: 1px solid var(--login-border);
+  background: var(--login-surface);
+  color: var(--login-foreground);
   padding: 0 12px;
 }
 
@@ -245,12 +268,36 @@
 @media (hover: hover) and (pointer: fine) {
   .closeButton:hover,
   .socialButton:hover {
-    border-color: #bfc3bd;
-    background: #f8f9f7;
+    border-color: color-mix(in srgb, var(--login-foreground) 22%, transparent);
+    background: var(--login-soft);
   }
 
   .primaryButton:hover {
-    background: #2f2f2f;
+    background: color-mix(in srgb, var(--login-primary) 84%, var(--login-foreground));
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .overlay {
+    --login-surface: #101010;
+    --login-background: #111111;
+    --login-border: color-mix(in srgb, var(--color-white) 13%, transparent);
+    --login-foreground: var(--color-white);
+    --login-muted: color-mix(in srgb, var(--color-white) 58%, transparent);
+    --login-soft: #191919;
+    --login-input: #141414;
+    --login-danger-background: color-mix(in srgb, #9f2f22 18%, transparent);
+    --login-danger-border: color-mix(in srgb, #ff8a78 36%, transparent);
+    --login-danger: #ff9a8b;
+    --login-success-background: color-mix(in srgb, #23713a 20%, transparent);
+    --login-success-border: color-mix(in srgb, #7bd996 34%, transparent);
+    --login-success: #9be4ad;
+    --login-primary: var(--color-white);
+    --login-primary-foreground: var(--color-black);
+  }
+
+  .backdrop {
+    background: rgb(0 0 0 / 70%);
   }
 }
 

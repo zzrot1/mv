@@ -11,10 +11,13 @@ type FooterColumn = {
   links: FooterLink[];
 };
 
+type FooterTheme = "light" | "dark" | "system";
+
 type FooterProps = {
   brandLabel?: string;
   description?: string;
   columns?: FooterColumn[];
+  theme?: FooterTheme;
 };
 
 const defaultColumns: FooterColumn[] = [
@@ -82,9 +85,10 @@ export function Footer({
   brandLabel = "Books & Culture",
   description = "Coffee table books and visual culture for contemporary living.",
   columns = defaultColumns,
+  theme = "system",
 }: FooterProps) {
   return (
-    <footer className={styles.footer}>
+    <footer className={styles.footer} data-theme={theme === "system" ? undefined : theme}>
       <FooterIntro brandLabel={brandLabel} description={description} />
       {columns.map((column) => (
         <FooterColumnGroup column={column} key={column.title} />

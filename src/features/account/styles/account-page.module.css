@@ -1,8 +1,23 @@
 .page {
+  --account-background: #f3f4f2;
+  --account-card: #ffffff;
+  --account-card-border: #dfe2dd;
+  --account-card-shadow: 0 12px 34px rgb(0 0 0 / 7%);
+  --account-foreground: #050505;
+  --account-muted: #70757a;
+  --account-soft: #f4f5f4;
+  --account-danger: #9f2f22;
+  --account-primary-button: #000000;
+  --account-primary-button-foreground: #ffffff;
+  --account-radius: 18px;
+  --account-row-height: 64px;
+  --account-section-gap: 12px;
+
   position: relative;
-  min-height: 100vh;
-  background: #f3f4f2;
-  color: #050505;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--account-background);
+  color: var(--account-foreground);
 }
 
 .sidebar {
@@ -11,7 +26,7 @@
   left: calc(50% - 430px);
   z-index: 2;
   width: 100px;
-  min-height: 100vh;
+  min-height: auto;
 }
 
 .navigation {
@@ -24,7 +39,7 @@
 .navigationLink,
 .activeLink {
   width: fit-content;
-  color: #6e7478;
+  color: var(--account-muted);
   cursor: pointer;
   font: inherit;
   text-align: left;
@@ -34,7 +49,7 @@
 }
 
 .activeLink {
-  color: #050505;
+  color: var(--account-foreground);
 }
 
 .content {
@@ -42,8 +57,8 @@
   display: flex;
   justify-content: center;
   min-width: 0;
-  min-height: 100vh;
-  padding: 84px 24px 96px;
+  min-height: 100svh;
+  padding: clamp(32px, 5vh, 56px) 24px;
 }
 
 .avatar {
@@ -53,40 +68,50 @@
   place-items: center;
   border: 2px solid #5134ff;
   border-radius: 50%;
-  color: #050505;
+  color: var(--account-foreground);
   font-size: 16px;
   font-weight: 500;
   line-height: 1;
 }
 
-.avatarButton {
+.backButton {
   position: absolute;
-  top: 8px;
-  right: clamp(28px, 4vw, 72px);
+  top: 16px;
+  left: clamp(24px, 4vw, 56px);
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  border-radius: 50%;
+  border: 1px solid var(--account-card-border);
+  border-radius: 999px;
+  background: var(--account-card);
+  color: var(--account-foreground);
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 
 .contentInner {
   width: min(100%, 642px);
 }
 
+.contentInner > .section {
+  margin-top: 42px;
+}
+
 .profileStack {
   display: grid;
-  gap: 32px;
+  gap: 42px;
 }
 
 .section {
   display: grid;
-  gap: 16px;
+  gap: var(--account-section-gap);
 }
 
 .sectionHeader {
   display: flex;
-  min-height: 38px;
+  min-height: 36px;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -102,41 +127,44 @@
 .outlineButton,
 .secondaryButton {
   display: inline-flex;
-  min-width: 44px;
-  min-height: 38px;
+  min-width: 58px;
+  min-height: 40px;
   align-items: center;
   justify-content: center;
-  border: 1px solid #d8dbd6;
-  border-radius: 12px;
-  background: #fbfcfb;
-  color: #050505;
+  border: 1px solid var(--account-card-border);
+  border-radius: 999px;
+  background: var(--account-card);
+  color: var(--account-foreground);
   font-size: 14px;
   line-height: 1;
+  padding: 0 16px;
   transition:
     border-color var(--duration-fast) var(--ease-out),
-    background var(--duration-fast) var(--ease-out);
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 
 .infoRow,
 .emptyCard,
 .preferenceRow {
   display: flex;
-  min-height: 52px;
+  min-height: var(--account-row-height);
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  border: 1px solid #dedfdb;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 5px 16px rgb(0 0 0 / 7%);
+  border: 1px solid var(--account-card-border);
+  border-radius: var(--account-radius);
+  background: var(--account-card);
+  box-shadow: var(--account-card-shadow);
 }
 
 .infoRow {
-  padding: 0 16px;
+  padding: 0 18px;
 }
 
 .infoLabel {
-  color: #70757a;
+  color: var(--account-muted);
 }
 
 .infoValue {
@@ -145,9 +173,9 @@
 }
 
 .emptyCard {
-  min-height: 74px;
+  min-height: var(--account-row-height);
   justify-content: flex-start;
-  padding: 12px 16px;
+  padding: 12px 18px;
 }
 
 .iconTile {
@@ -156,18 +184,18 @@
   height: 40px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 12px;
-  background: #f4f5f4;
-  color: #050505;
+  border-radius: 14px;
+  background: var(--account-soft);
+  color: var(--account-foreground);
 }
 
 .emptyText {
-  color: #70757a;
+  color: var(--account-muted);
 }
 
 .preferenceRow {
-  min-height: 56px;
-  padding: 0 16px;
+  min-height: var(--account-row-height);
+  padding: 0 18px;
 }
 
 .preferenceLabel {
@@ -177,7 +205,7 @@
 }
 
 .preferenceIcon {
-  color: #6f7478;
+  color: var(--account-muted);
 }
 
 .toggle {
@@ -185,9 +213,9 @@
   width: 38px;
   height: 22px;
   flex: 0 0 auto;
-  border: 1px solid #d7d9d5;
+  border: 1px solid var(--account-card-border);
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--account-card);
 }
 
 .toggleHandle {
@@ -206,20 +234,29 @@
 
 .toggle[aria-pressed="true"] .toggleHandle {
   left: 18px;
-  background: #111111;
+  background: var(--account-foreground);
 }
 
 .actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 20px;
-  margin-top: 32px;
+  gap: 12px 18px;
+  margin-top: 30px;
+  border: 1px solid var(--account-card-border);
+  border-radius: var(--account-radius);
+  background: var(--account-card);
+  box-shadow: var(--account-card-shadow);
+  padding: 16px 18px;
 }
 
 .textButton {
-  min-height: 38px;
+  min-height: 40px;
+  width: fit-content;
+  color: var(--account-foreground);
   font-size: 14px;
   line-height: 1;
+  padding-inline: 4px;
 }
 
 .secondaryButton:disabled {
@@ -228,13 +265,14 @@
 }
 
 .actionError {
-  color: #9f2f22;
+  grid-column: 1 / -1;
+  color: var(--account-danger);
   font-size: 14px;
   line-height: 1.35;
 }
 
 .addressText {
-  color: #3f4447;
+  color: color-mix(in srgb, var(--account-foreground) 78%, transparent);
   line-height: 1.35;
 }
 
@@ -264,9 +302,9 @@
   max-height: min(760px, calc(100vh - 48px));
   overflow: auto;
   gap: 16px;
-  border: 1px solid #d8dbd6;
+  border: 1px solid var(--account-card-border);
   border-radius: 18px;
-  background: #f3f4f2;
+  background: var(--account-background);
   box-shadow: 0 24px 80px rgb(0 0 0 / 25%);
   padding: 22px;
 }
@@ -279,7 +317,7 @@
 }
 
 .addressModalTitle {
-  color: #050505;
+  color: var(--account-foreground);
   font-size: 22px;
   font-weight: 400;
   line-height: 1.2;
@@ -291,7 +329,7 @@
   height: 32px;
   place-items: center;
   border-radius: 50%;
-  color: #6e7478;
+  color: var(--account-muted);
   font-size: 24px;
   line-height: 1;
 }
@@ -308,32 +346,51 @@
 }
 
 .addressField {
+  position: relative;
   display: grid;
-  gap: 2px;
+  gap: 4px;
 }
 
 .addressField > span:not(.srOnly) {
-  color: #6e7478;
-  font-size: 12px;
+  color: var(--account-muted);
+  font-size: 11px;
   line-height: 1;
-  padding-inline: 10px;
+  padding-inline: 2px;
 }
 
 .addressInput {
   width: 100%;
   min-height: 50px;
-  border: 1px solid #d8dbd6;
+  border: 1px solid var(--account-card-border);
   border-radius: 12px;
-  background: #ffffff;
-  color: #050505;
-  padding: 0 12px;
+  background: var(--account-card);
+  color: var(--account-foreground);
+  padding: 0 18px;
   font-size: 15px;
   outline: 0;
 }
 
+.addressSelect {
+  appearance: none;
+  padding-right: 52px;
+}
+
+.addressSelectField::after {
+  position: absolute;
+  right: 18px;
+  bottom: 20px;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--account-foreground);
+  border-bottom: 1.5px solid var(--account-foreground);
+  content: "";
+  pointer-events: none;
+  transform: rotate(45deg);
+}
+
 .addressInput:focus {
-  border-color: #050505;
-  box-shadow: 0 0 0 1px #050505;
+  border-color: var(--account-foreground);
+  box-shadow: 0 0 0 1px var(--account-foreground);
 }
 
 .addressModalActions {
@@ -359,22 +416,22 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  border: 1px solid #dedfdb;
+  border: 1px solid var(--account-card-border);
   border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 5px 16px rgb(0 0 0 / 7%);
+  background: var(--account-card);
+  box-shadow: var(--account-card-shadow);
   padding: 30px 32px;
 }
 
 .ordersTitle {
-  color: #050505;
+  color: var(--account-foreground);
   font-size: 21px;
   font-weight: 400;
   line-height: 1.15;
 }
 
 .ordersText {
-  color: #6f6860;
+  color: var(--account-muted);
   font-size: 21px;
   line-height: 1.15;
 }
@@ -386,8 +443,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: #000000;
-  color: #ffffff;
+  background: var(--account-primary-button);
+  color: var(--account-primary-button-foreground);
   font-size: 14px;
   line-height: 1;
   padding: 0 14px;
@@ -396,23 +453,60 @@
 @media (hover: hover) and (pointer: fine) {
   .navigationLink:hover,
   .activeLink:hover {
-    color: #050505;
+    color: var(--account-foreground);
     transform: translateX(2px);
   }
 
   .outlineButton:hover,
   .secondaryButton:hover {
-    border-color: #bfc3bd;
-    background: #ffffff;
+    border-color: color-mix(in srgb, var(--account-foreground) 24%, transparent);
+    background: var(--account-card);
+    box-shadow: 0 8px 22px rgb(0 0 0 / 8%);
+    transform: translateY(-1px);
+  }
+
+  .backButton:hover {
+    border-color: color-mix(in srgb, var(--account-foreground) 24%, transparent);
+    transform: translateX(-2px);
   }
 
   .textButton:hover {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    color: var(--account-muted);
   }
 
   .shopButton:hover {
-    background: #2f2f2f;
+    background: color-mix(in srgb, var(--account-primary-button) 82%, var(--account-foreground));
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    --account-background: #111111;
+    --account-card: #101010;
+    --account-card-border: color-mix(in srgb, var(--color-white) 13%, transparent);
+    --account-card-shadow: none;
+    --account-foreground: var(--color-white);
+    --account-muted: color-mix(in srgb, var(--color-white) 56%, transparent);
+    --account-soft: #191919;
+    --account-danger: #ff8a78;
+    --account-primary-button: var(--color-white);
+    --account-primary-button-foreground: var(--color-black);
+  }
+
+  .modalBackdrop {
+    background: rgb(0 0 0 / 72%);
+  }
+
+  .addressInput::placeholder {
+    color: color-mix(in srgb, var(--account-foreground) 42%, transparent);
+  }
+
+  .toggleHandle {
+    background: color-mix(in srgb, var(--account-foreground) 56%, transparent);
+  }
+
+  .avatar {
+    border-color: #8c7cff;
   }
 }
 
@@ -436,7 +530,8 @@
   }
 
   .content {
-    padding: 84px 20px 56px;
+    min-height: auto;
+    padding: 32px 20px 40px;
   }
 
   .avatar {
@@ -444,9 +539,9 @@
     height: 32px;
   }
 
-  .avatarButton {
+  .backButton {
     top: 16px;
-    right: 20px;
+    left: 20px;
   }
 
   .contentInner {
@@ -456,7 +551,7 @@
 
 @media (max-width: 560px) {
   .content {
-    padding-top: 64px;
+    padding-top: 28px;
   }
 
   .sectionHeader,
@@ -466,7 +561,7 @@
 
   .infoRow,
   .preferenceRow {
-    min-height: 58px;
+    min-height: 64px;
   }
 
   .infoRow {
@@ -482,8 +577,14 @@
   }
 
   .actions {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 10px;
+    padding: 14px;
+  }
+
+  .secondaryButton,
+  .textButton {
+    width: 100%;
   }
 
   .ordersCard {

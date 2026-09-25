@@ -1,38 +1,56 @@
 .page {
+  --verify-background: #111111;
+  --verify-card: #101010;
+  --verify-border: color-mix(in srgb, var(--color-white) 13%, transparent);
+  --verify-foreground: var(--color-white);
+  --verify-muted: color-mix(in srgb, var(--color-white) 58%, transparent);
+  --verify-soft: #1d1d1d;
+  --verify-shadow: none;
+  --verify-primary: var(--color-white);
+  --verify-primary-foreground: var(--color-black);
+
   display: grid;
-  min-height: 100vh;
+  min-height: calc(100svh - var(--header-height));
   place-items: center;
-  background: #f3f4f2;
-  color: #050505;
+  background: var(--verify-background);
+  color: var(--verify-foreground);
   padding: 24px;
 }
 
 .card {
   display: grid;
   width: min(100%, 520px);
-  gap: 16px;
-  border: 1px solid #dedfdb;
+  gap: 28px;
+  border: 1px solid var(--verify-border);
   border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 12px 34px rgb(0 0 0 / 8%);
+  background: var(--verify-card);
+  box-shadow: var(--verify-shadow);
+  font-family: var(--font-sans);
   padding: 34px;
 }
 
+.copyGroup {
+  display: grid;
+  gap: 10px;
+}
+
 .eyebrow {
-  color: #6e7478;
+  color: var(--verify-muted);
   font-size: 14px;
   line-height: 1.2;
 }
 
 .title {
-  color: #050505;
+  color: var(--verify-foreground);
+  font-family: var(--font-sans);
   font-size: 28px;
   font-weight: 500;
+  letter-spacing: 0;
   line-height: 1.12;
 }
 
 .description {
-  color: #64686b;
+  color: var(--verify-muted);
   font-size: 16px;
   line-height: 1.45;
 }
@@ -44,8 +62,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: #111111;
-  color: #ffffff;
+  background: var(--verify-primary);
+  color: var(--verify-primary-foreground);
+  font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1;
   padding: 0 16px;
@@ -56,7 +75,7 @@
   height: 4px;
   overflow: hidden;
   border-radius: 999px;
-  background: #ecedea;
+  background: var(--verify-soft);
 }
 
 .progressBar::after {
@@ -65,7 +84,7 @@
   width: 42%;
   border-radius: inherit;
   animation: loading 1s infinite ease-in-out;
-  background: #111111;
+  background: var(--verify-primary);
   content: "";
 }
 
@@ -77,6 +96,18 @@
   100% {
     transform: translateX(240%);
   }
+}
+
+.page[data-theme="light"] {
+  --verify-background: #f3f4f2;
+  --verify-card: #ffffff;
+  --verify-border: #dedfdb;
+  --verify-foreground: #101010;
+  --verify-muted: #64686b;
+  --verify-soft: #ecedea;
+  --verify-shadow: 0 12px 34px rgb(0 0 0 / 8%);
+  --verify-primary: #111111;
+  --verify-primary-foreground: #ffffff;
 }
 
 @media (max-width: 560px) {

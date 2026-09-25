@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { getErrorMessage } from "orval-data-handler";
+import { clearAccessToken, getErrorMessage } from "orval-data-handler";
 import { useLogout } from "@/service-api/generated/endpoints/auth/auth";
+import { getGetProfileQueryKey } from "@/service-api/generated/endpoints/profile/profile";
 
 import styles from "../styles/account-page.module.css";
 
@@ -14,6 +15,8 @@ export function AccountActions() {
   const logoutMutation = useLogout({
     mutation: {
       onSuccess: () => {
+        clearAccessToken();
+        queryClient.removeQueries({ queryKey: getGetProfileQueryKey() });
         queryClient.clear();
         router.push("/");
         router.refresh();
@@ -36,9 +39,6 @@ export function AccountActions() {
         type="button"
       >
         {logoutMutation.isPending ? "Signing out..." : "Sign out"}
-      </button>
-      <button className={styles.textButton} type="button">
-        Sign out of all devices
       </button>
       {logoutMutation.isError ? (
         <p className={styles.actionError} role="alert">

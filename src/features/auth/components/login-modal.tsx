@@ -1,5 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
+
+import { useGetProfile } from "@/service-api/generated/endpoints/profile/profile";
+
 import { CloseIcon } from "./auth-icons";
 import { LoginForm } from "./login-form";
 import styles from "../styles/login-modal.module.css";
@@ -10,7 +14,19 @@ type LoginModalProps = {
 };
 
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  if (!isOpen) {
+  const profileQuery = useGetProfile({
+    query: {
+      retry: false,
+    },
+  });
+
+  useEffect(() => {
+    if (isOpen && profileQuery.isSuccess) {
+      onClose();
+    }
+  }, [isOpen, onClose, profileQuery.isSuccess]);
+
+  if (!isOpen || profileQuery.isSuccess) {
     return null;
   }
 

@@ -25,9 +25,11 @@ export function RegisteredAuthGuard({ children }: RegisteredAuthGuardProps) {
     return (
       <main className={styles.page}>
         <section className={styles.card}>
-          <p className={styles.eyebrow}>Account</p>
-          <h1 className={styles.title}>Checking your session</h1>
-          <p className={styles.description}>Please wait a moment.</p>
+          <div className={styles.copyGroup}>
+            <p className={styles.eyebrow}>Account</p>
+            <h1 className={styles.title}>Checking your session</h1>
+            <p className={styles.description}>Please wait a moment.</p>
+          </div>
         </section>
       </main>
     );
@@ -40,13 +42,15 @@ export function RegisteredAuthGuard({ children }: RegisteredAuthGuardProps) {
   return (
     <main className={styles.page}>
       <section className={styles.card}>
-        <p className={styles.eyebrow}>Account</p>
-        <h1 className={styles.title}>Sign in to continue</h1>
-        <p className={styles.description}>
-          {isUnauthorized
-            ? "You need to log in before accessing your account."
-            : "We could not confirm your session. Please log in again."}
-        </p>
+        <div className={styles.copyGroup}>
+          <p className={styles.eyebrow}>Account</p>
+          <h1 className={styles.title}>Sign in to continue</h1>
+          <p className={styles.description}>
+            {isUnauthorized
+              ? "You need to log in before accessing your account."
+              : "We could not confirm your session. Please log in again."}
+          </p>
+        </div>
         <button
           className={styles.primaryButton}
           onClick={loginModal.openLoginModal}

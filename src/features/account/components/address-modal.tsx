@@ -93,10 +93,10 @@ export function AddressModal({ isOpen, onClose, profile }: AddressModalProps) {
         </div>
 
         <form className={styles.addressForm} onSubmit={handleSubmit}>
-          <label className={styles.addressField}>
+          <label className={`${styles.addressField} ${styles.addressSelectField}`}>
             <span>Country/region</span>
             <select
-              className={styles.addressInput}
+              className={`${styles.addressInput} ${styles.addressSelect}`}
               defaultValue={profile.country || "DE"}
               name="country"
             >

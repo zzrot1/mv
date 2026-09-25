@@ -31,7 +31,7 @@ export function AccountShell({ navigationItems, profile }: AccountShellProps) {
         onSectionChange={setActiveSection}
       />
       <section className={styles.content} aria-label="Account">
-        <AccountLoginControl initials={profile.initials} />
+        <AccountLoginControl />
         <div className={styles.contentInner}>
           {activeSection === "orders" ? (
             <OrdersEmptyState profile={profile} />

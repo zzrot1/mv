@@ -47,6 +47,7 @@ export function HeaderAccountAction() {
       <button
         aria-label="Open login modal"
         className={styles["header__icon-link"]}
+        disabled={profileQuery.isPending}
         onClick={loginModal.openLoginModal}
         title="Account"
         type="button"

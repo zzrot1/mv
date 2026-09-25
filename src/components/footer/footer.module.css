@@ -1,8 +1,8 @@
 .footer {
-  --footer-background: var(--color-black);
-  --footer-foreground: var(--color-white);
-  --footer-muted: color-mix(in srgb, var(--color-white) 70%, transparent);
-  --footer-separator: color-mix(in srgb, var(--color-white) 14%, transparent);
+  --footer-background: var(--color-white);
+  --footer-foreground: var(--color-ink);
+  --footer-muted: var(--color-muted);
+  --footer-separator: var(--color-line);
 
   position: relative;
   display: grid;
@@ -46,6 +46,20 @@
     transparent
   );
   content: "";
+}
+
+.footer[data-theme="dark"] {
+  --footer-background: var(--color-black);
+  --footer-foreground: var(--color-white);
+  --footer-muted: color-mix(in srgb, var(--color-white) 70%, transparent);
+  --footer-separator: color-mix(in srgb, var(--color-white) 14%, transparent);
+}
+
+.footer[data-theme="light"] {
+  --footer-background: var(--color-white);
+  --footer-foreground: var(--color-ink);
+  --footer-muted: var(--color-muted);
+  --footer-separator: var(--color-line);
 }
 
 .footer__intro {
@@ -95,6 +109,15 @@
 
 .footer__link:hover {
   color: var(--footer-foreground);
+}
+
+@media (prefers-color-scheme: dark) {
+  .footer:not([data-theme]) {
+    --footer-background: var(--color-black);
+    --footer-foreground: var(--color-white);
+    --footer-muted: color-mix(in srgb, var(--color-white) 70%, transparent);
+    --footer-separator: color-mix(in srgb, var(--color-white) 14%, transparent);
+  }
 }
 
 @media (max-width: 780px) {
