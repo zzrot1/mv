@@ -1,8 +1,9 @@
-import type { AccountNavigationItem, AccountProfile } from "../model/account";
-import { useDataPage } from "orval-data-handler";
+import { useMemo } from "react";
+
 import { useGetProfile } from "@/service-api/generated/endpoints/profile/profile";
 
-import { AccountDataPage } from "../data/account-data-page";
+import { mapAccountProfile } from "../data/account-profile";
+import type { AccountNavigationItem } from "../model/account";
 
 const accountNavigationItems: AccountNavigationItem[] = [
   {
@@ -21,14 +22,16 @@ export function useAccountProfile() {
       retry: false,
     },
   });
-  const { isLoading, accountProfile } = useDataPage(
-    AccountDataPage,
-    profileQuery,
+
+  const user = profileQuery.data;
+  const profile = useMemo(
+    () => (user ? mapAccountProfile(user) : undefined),
+    [user],
   );
 
   return {
-    isLoading,
+    isLoading: profileQuery.isLoading,
     navigationItems: accountNavigationItems,
-    profile: accountProfile,
+    profile,
   };
 }
