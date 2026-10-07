@@ -3,7 +3,6 @@
 import {
   DataHandler,
   type ResourceRules,
-  type WriteEvent,
   type WriteMeta,
 } from "orval-data-handler";
 
@@ -11,9 +10,8 @@ import {
   allApiResourceNames,
   type AllApiResourceName,
 } from "@/service-api/generated/api-resource-names";
-import { getErrorMessage } from "orval-data-handler";
 
-const nonDataResourceNames = ["auth"] as const;
+const nonDataResourceNames = ["auth"] as const satisfies readonly AllApiResourceName[];
 
 type NonDataResourceName = (typeof nonDataResourceNames)[number];
 
@@ -22,30 +20,16 @@ export type ApiMutationMeta = WriteMeta;
 
 const nonDataResources: ReadonlySet<string> = new Set(nonDataResourceNames);
 
+function isDataResource(
+  resourceName: AllApiResourceName,
+): resourceName is ApiResourceName {
+  return !nonDataResources.has(resourceName);
+}
+
 class ApiDataHandler extends DataHandler<ApiResourceName> {
-  protected readonly resourceNames = allApiResourceNames.filter(
-    (resourceName): resourceName is ApiResourceName =>
-      !nonDataResources.has(resourceName),
-  );
+  protected readonly resourceNames = allApiResourceNames.filter(isDataResource);
 
   protected readonly rules: ResourceRules<ApiResourceName> = {};
-
-  protected getErrorMessage(error: unknown) {
-    return getErrorMessage(error);
-  }
-
-  protected onWriteCompleted(event: WriteEvent<ApiResourceName>) {
-    if (process.env.NODE_ENV === "production") {
-      return;
-    }
-
-    console.debug(
-      `[data] ${event.operationName}: ${event.outcome} in "${event.resourceName}"` +
-        ` (${event.strategy}${event.wasOptimistic ? ", optimistic" : ""})` +
-        ` | reloaded: ${event.reloadedResources.join(", ") || "-"}`,
-      [...event.updatedQueryKeys, ...event.reloadedQueryKeys],
-    );
-  }
 }
 
 export const apiDataHandler = new ApiDataHandler();
