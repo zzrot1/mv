@@ -52,19 +52,14 @@ const EMPTY: readonly never[] = [];
 
 export type DataGridOptions<TRow> = {
   data: readonly TRow[] | undefined;
-  // Keep `columns` and `filters` referentially stable (module scope or useMemo).
   columns: readonly ColumnDef<TRow>[];
-  // The filter chain above the grid. Default: [searchFilter()]. Pass a function
-  // to extend the defaults: (defaults) => [...defaults, myFilter].
   filters?: GridFiltersOption<TRow>;
   getRowId?: (row: TRow, index: number) => RowId;
   mode?: ProcessingModesOption;
-  // Total rows on the server; required for server pagination.
   rowCount?: number;
   initialState?: Partial<GridState>;
   state?: Partial<GridState>;
   onStateChange?: (state: GridState) => void;
-  // Called on mount and whenever a step that runs on the server changes.
   onQueryChange?: GridQueryListener;
   enablePagination?: boolean;
   defaultPageSize?: number;
@@ -81,7 +76,6 @@ export type DataGridInstance<TRow> = {
   modes: ProcessingModes;
   state: GridState;
   rows: readonly GridRow<TRow>[];
-  // True while the visible rows still reflect the previous filters or sorting.
   isProcessing: boolean;
   filters: {
     toolbar: {
@@ -161,8 +155,6 @@ export function useDataGrid<TRow>(
   );
   const state = mergeGridState(internalState, options.state);
 
-  // Controls update right away; the rows follow in a background render, and the
-  // grid shows an overlay while they catch up.
   const viewState = useDeferredValue(state);
   const isProcessing = viewKey(viewState) !== viewKey(state);
 
@@ -319,8 +311,6 @@ function viewKey({ columnFilters, filters, pagination, sorting }: GridState) {
   return JSON.stringify([filters, columnFilters, sorting, pagination]);
 }
 
-// Select options read from the loaded rows. On the server the rows are only a
-// page, so there the options must come from the consumer.
 function computeSelectOptions<TRow>({
   columns,
   data,

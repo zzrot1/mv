@@ -11,7 +11,6 @@ export type SlotResolver = (
   baseStyle?: CSSProperties,
 ) => SlotProps;
 
-// The consumer's class and inline style for a part come after the built-in ones.
 export function createSlotResolver(
   classNames: GridClassNames = {},
   styles: GridStyles = {},

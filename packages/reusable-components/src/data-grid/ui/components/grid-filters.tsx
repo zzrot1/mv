@@ -3,7 +3,6 @@
 import { useDataGridContext } from "../grid-context";
 import { FilterControl } from "./filter-control";
 
-// The filter chain, in order. Each filter brings its own control.
 export function GridFilters() {
   const { grid, labels } = useDataGridContext();
   const { toolbar } = grid.filters;

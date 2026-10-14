@@ -1,6 +1,3 @@
-// Every selector is `element:where(.class)`: specificity (0,0,1). It wins over a
-// `*` reset, ties with element resets, and loses to any class the consumer adds.
-// Colors use light-dark(), so the grid follows the `color-scheme` it sits in.
 export const defaultGridStyles = `
 :where(.rc-root) {
   --_background: var(--rc-background, light-dark(#ffffff, #0a0a0a));

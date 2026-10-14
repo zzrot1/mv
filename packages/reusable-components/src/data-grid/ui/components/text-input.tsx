@@ -16,8 +16,6 @@ type TextInputProps = Omit<
   debounceMs?: number;
 };
 
-// Keeps what the user types locally and commits it after `debounceMs`, so a
-// server-side search doesn't send a request per keystroke.
 export function TextInput({
   debounceMs = 0,
   onCommit,

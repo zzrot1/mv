@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
+# dependencies (root and workspace packages)
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -11,7 +11,11 @@
 !.yarn/versions
 
 # testing
-/coverage
+coverage/
+
+# storybook
+storybook-static/
+*storybook.log
 
 # next.js
 /.next/

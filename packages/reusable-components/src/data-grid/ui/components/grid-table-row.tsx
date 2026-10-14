@@ -127,6 +127,5 @@ function CellValue({ value }: { value: unknown }) {
     return value ? labels.yes : labels.no;
   }
 
-  // ISO date: the same on the server and in the browser, so hydration matches.
   return value instanceof Date ? toText(value).slice(0, 10) : toText(value);
 }

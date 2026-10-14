@@ -1,5 +1,3 @@
-// Every text the grid shows or announces. Nothing is composed inside the grid,
-// so each entry can come from a translation (e.g. Lingui's `t`).
 export type GridLabels = {
   actions: string;
   allOptions: string;

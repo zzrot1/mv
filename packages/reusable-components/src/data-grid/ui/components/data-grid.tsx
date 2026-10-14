@@ -15,7 +15,6 @@ import type { DataGridInstance } from "../use-data-grid";
 
 export type DataGridProps<TRow> = GridAppearance & {
   grid: DataGridInstance<TRow>;
-  // Asks before running an action that has a `confirm` message.
   confirm?: ConfirmPort;
   children: ReactNode;
 };

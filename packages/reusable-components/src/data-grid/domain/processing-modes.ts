@@ -4,8 +4,6 @@ export type ProcessingModesOption =
   | ProcessingMode
   | Partial<Record<GridFeature, ProcessingMode>>;
 
-// A page that came from the server can't be searched, filtered or sorted as a
-// whole on the client, so server pagination moves every step to the server.
 export function resolveProcessingModes(
   option: ProcessingModesOption = "client",
 ): ProcessingModes {

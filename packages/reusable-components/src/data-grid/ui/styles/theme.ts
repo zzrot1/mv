@@ -1,7 +1,5 @@
 import type { CSSProperties } from "react";
 
-// The base names match the shadcn/ui tokens, so an app that already has them
-// can map them once: `:root { --rc-primary: var(--primary); }`.
 export type GridTheme = {
   accent?: string;
   background?: string;

@@ -18,14 +18,12 @@ export type FilterRenderContext<TValue = unknown> = {
   label: string;
   value: TValue | undefined;
   setValue(value: TValue | undefined): void;
-  // Closes the column filter popover; does nothing in the toolbar.
   close(): void;
 };
 
 type FilterUi = {
   placeholder?: string;
   options?: readonly FilterOption[];
-  // Replaces the built-in control.
   render?: (context: FilterRenderContext) => ReactNode;
 };
 
@@ -36,7 +34,6 @@ export type ColumnFilterDef<TRow> = NonNullable<ColumnModel<TRow>["filter"]> &
 
 export type ColumnDef<TRow> = Omit<ColumnModel<TRow>, "filter"> & {
   header: ReactNode;
-  // Accessible name when `header` is not plain text.
   label?: string;
   cell?: (context: CellContext<TRow>) => ReactNode;
   filter?: ColumnFilterDef<TRow>;
@@ -45,12 +42,10 @@ export type ColumnDef<TRow> = Omit<ColumnModel<TRow>, "filter"> & {
   className?: string;
 };
 
-// A filter above the grid: one link of the filter chain plus its control.
 export type GridFilterDef<TRow> = GridFilterModel<TRow> &
   FilterUi & {
     label?: string;
     variant?: ControlVariant;
-    // Lets a "select" read its options from the loaded rows.
     accessor?: Accessor<TRow>;
   };
 
@@ -67,20 +62,17 @@ type ActionBase = {
   tone?: ActionTone;
 };
 
-// Return a promise from `onClick` to disable the button while it runs.
 export type RowAction<TRow> = ActionBase & {
   onClick: (row: TRow) => unknown;
   confirm?: string | ((row: TRow) => string);
   isDisabled?: (row: TRow) => boolean;
   isHidden?: (row: TRow) => boolean;
-  // Draws a line above the item in the actions menu.
   separatorBefore?: boolean;
 };
 
 export type RowActionsRenderContext<TRow> = {
   row: TRow;
   rowId: RowId;
-  // Accessible name of the row, e.g. for an aria-label.
   rowName: string;
 };
 
@@ -90,13 +82,9 @@ export type BulkAction<TRow> = ActionBase & {
 };
 
 export type LoadingOverlayOptions = {
-  // Wait before showing it, so instant changes don't flash (default 150).
   delayMs?: number;
-  // Once shown, keep it at least this long (default 300).
   minDurationMs?: number;
-  // Replaces the built-in spinner.
   spinner?: ReactNode;
-  // Replaces everything inside the overlay.
   content?: ReactNode;
 };
 
@@ -135,7 +123,6 @@ export type GridStyles = Partial<Record<GridSlot, CSSProperties>>;
 export type GridAppearance = {
   className?: string;
   classNames?: GridClassNames;
-  // Without it the grid follows the surrounding `color-scheme` (and `.dark`).
   colorScheme?: ColorScheme;
   labels?: Partial<GridLabels>;
   style?: CSSProperties;

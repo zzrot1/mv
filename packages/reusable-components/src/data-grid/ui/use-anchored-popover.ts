@@ -6,13 +6,9 @@ import { placePopover } from "./place-popover";
 
 type AnchoredPopoverOptions = {
   align?: "start" | "center" | "end";
-  // What gets focus once the popover is open.
   focusSelector: string;
 };
 
-// A native popover (`popover="auto"`) opened by a `popoverTarget` button: the
-// browser handles Escape, outside clicks and focus return; this keeps it next
-// to its trigger while the page scrolls or resizes.
 export function useAnchoredPopover({ align, focusSelector }: AnchoredPopoverOptions) {
   const popoverId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);

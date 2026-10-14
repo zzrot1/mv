@@ -24,6 +24,5 @@ export function useDataGridContext<TRow = unknown>(): DataGridContextValue<TRow>
     throw new Error("Data grid parts must be rendered inside <DataGrid>.");
   }
 
-  // The context erases the row type; every part renders inside the grid that set it.
   return context as unknown as DataGridContextValue<TRow>;
 }

@@ -6,7 +6,6 @@ import type { ConfirmPort } from "../application/ports";
 import type { GridLabels } from "./labels";
 import type { LoadingOverlayOptions } from "./types";
 
-// App-wide defaults; a grid's own props still win.
 export type DataGridConfig = {
   labels?: Partial<GridLabels>;
   confirm?: ConfirmPort;

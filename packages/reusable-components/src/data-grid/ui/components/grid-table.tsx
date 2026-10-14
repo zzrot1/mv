@@ -17,19 +17,12 @@ export type GridTableProps<TRow> = {
   caption?: string;
   emptyState?: ReactNode;
   error?: ReactNode;
-  // Rows are being refetched: the current ones stay, under the overlay.
   isFetching?: boolean;
-  // No rows yet.
   isLoading?: boolean;
-  // A fixed height (480, "60vh"): rows scroll inside and the header stays.
-  // Without it the table keeps the height of a full page while filtering.
   height?: number | string;
-  // Shown while loading, fetching or re-filtering. `false` turns it off.
   loadingOverlay?: LoadingOverlayOptions | false;
   rowActions?: readonly RowAction<TRow>[];
-  // "menu": one "⋯" button with a dropdown; "inline": a button per action.
   rowActionsDisplay?: "menu" | "inline";
-  // Replaces the built-in actions with your own element (e.g. a shadcn DropdownMenu).
   renderRowActions?: (context: RowActionsRenderContext<TRow>) => ReactNode;
 };
 

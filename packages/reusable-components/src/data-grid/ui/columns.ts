@@ -9,7 +9,6 @@ export function getColumnLabel<TRow>(column: ColumnDef<TRow>) {
   );
 }
 
-// Names a row for screen readers: the text of its first searchable column.
 export function getRowName<TRow>(
   columns: readonly ColumnDef<TRow>[],
   row: TRow,

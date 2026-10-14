@@ -31,11 +31,9 @@ type BaseFilterOptions = {
 
 type MatchFilterOptions<TRow> = BaseFilterOptions & {
   accessor?: Accessor<TRow>;
-  // Replaces the built-in matching on `accessor`.
   predicate?: (row: TRow, value: unknown) => boolean;
 };
 
-// The default first link of the chain: every word must match a searchable column.
 export function searchFilter<TRow>(
   config: Partial<BaseFilterOptions> = {},
 ): GridFilterDef<TRow> {
@@ -70,7 +68,6 @@ export function numberRangeFilter<TRow>(config: MatchFilterOptions<TRow>) {
 type CustomFilterOptions<TRow, TValue> = Omit<BaseFilterOptions, "label"> & {
   label?: string;
   render: (context: FilterRenderContext<TValue>) => ReactNode;
-  // Your link of the chain. Call `next` with the rows that pass.
   handle?: (
     rows: readonly TRow[],
     value: TValue,
@@ -78,9 +75,6 @@ type CustomFilterOptions<TRow, TValue> = Omit<BaseFilterOptions, "label"> & {
     context: { columns: readonly ColumnModel<TRow>[] },
   ) => readonly TRow[];
 };
-
-// The grid stores filter values untyped; these two only read back what their
-// own control wrote, so the casts are safe.
 
 export function customFilter<TRow, TValue = unknown>({
   handle,

@@ -1,15 +1,15 @@
 const GAP = 6;
 const VIEWPORT_MARGIN = 8;
 
-// Puts a top-layer popover under its trigger, flipped above it when there is no
-// room below, and kept inside the viewport.
 export function placePopover(
   popover: HTMLElement,
   trigger: HTMLElement,
   align: "start" | "center" | "end" = "start",
 ) {
   const anchor = trigger.getBoundingClientRect();
-  const { height, width } = popover.getBoundingClientRect();
+  // Layout size, not the bounding box: the entry animation scales the popover.
+  const height = popover.offsetHeight;
+  const width = popover.offsetWidth;
 
   const preferredLeft = align === "end" ? anchor.right - width : anchor.left;
   const left = clamp(

@@ -7,7 +7,6 @@ import type {
   ProcessingModes,
 } from "../domain/types";
 
-// Only the steps the server runs: a change in a client step never needs a request.
 export type ServerGridQuery = Partial<GridQuery>;
 
 export function toServerQuery(

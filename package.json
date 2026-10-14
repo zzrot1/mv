@@ -11,7 +11,10 @@
     "generate-webapi": "orval.cmd",
     "generate-webapi:watch": "orval --watch",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "storybook": "npm run storybook --workspace reusable-components",
+    "test:components": "npm run test --workspace reusable-components",
+    "test:components:coverage": "npm run test:coverage --workspace reusable-components"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.4",
@@ -23,7 +26,7 @@
     "reusable-components": "*"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

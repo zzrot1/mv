@@ -22,7 +22,6 @@ export type GridViewInput<TRow> = {
   state: GridState;
   modes: ProcessingModes;
   paginate: boolean;
-  // Total number of rows on the server; only read when pagination runs there.
   rowCount?: number;
 };
 
@@ -37,8 +36,6 @@ export function computeGridView<TRow>(input: GridViewInput<TRow>): GridView<TRow
   return paginateView(runChain(buildClientChain(input), input.data), input);
 }
 
-// The filters above the grid, in their order, then the column filters, then
-// sorting. Steps that run on the server are left out: `data` already reflects them.
 export function buildClientChain<TRow>({
   columns,
   filters,

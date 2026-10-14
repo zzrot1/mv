@@ -518,6 +518,31 @@ src/data-grid/
 The rules in `domain` and `application` can be tested and reused without React,
 and run on the server too.
 
+# Development
+
+Stories live next to the code, in `src/**/stories/*.stories.tsx`. They aren't
+part of the published package.
+
+| Command (from the repo root) | What it does |
+|---|---|
+| `npm run storybook` | Storybook at http://localhost:6006 |
+| `npm run test:components` | runs every story as a test in headless Chromium |
+| `npm run test:components:coverage` | the same, plus coverage in `packages/reusable-components/coverage/` |
+
+The same scripts exist inside the package as `storybook`, `test`,
+`test:coverage`, `test:watch`, `build-storybook` and `typecheck`.
+
+Every story is a test:
+
+- it renders in a real browser;
+- it runs its `play` function, which clicks, types and asserts;
+- it fails on any accessibility violation (axe, `a11y: { test: "error" }`).
+
+Coverage is measured on `src/` (stories excluded), with an 80% threshold for
+statements, branches, functions and lines.
+
+The first run needs the test browser: `npx playwright install chromium`.
+
 ## License
 
 MIT

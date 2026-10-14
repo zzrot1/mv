@@ -17,7 +17,6 @@ export type PaginationState = { pageIndex: number; pageSize: number };
 export type RowSelectionState = Readonly<Record<RowId, boolean>>;
 
 export type GridState = {
-  // Values of the filters above the grid, by filter id; the search bar is "search".
   filters: FilterValues;
   columnFilters: FilterValues;
   sorting: SortingState;
@@ -50,7 +49,6 @@ export type ColumnModel<TRow> = {
 
 export type RowsHandler<TRow> = (rows: readonly TRow[]) => readonly TRow[];
 
-// A link of the filter chain: narrow the rows (or not) and hand them to `next`.
 export type FilterHandler<TRow> = (
   rows: readonly TRow[],
   value: unknown,
@@ -60,8 +58,6 @@ export type FilterHandler<TRow> = (
 
 export type GridFilterModel<TRow> = {
   id: string;
-  // Overrides the grid's `filters` mode for this filter only.
   mode?: ProcessingMode;
-  // Runs on the client. Without it the filter's value only goes to the server.
   handle?: FilterHandler<TRow>;
 };
