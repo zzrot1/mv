@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  useDeferredValue,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useDeferredValue, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
-import { computeGridView } from "../application/compute-grid-view";
 import {
   createGridState,
   DEFAULT_PAGE_SIZE,
@@ -18,18 +10,18 @@ import {
   mergeGridState,
   type GridAction,
 } from "../application/grid-state";
-import type { GridQueryListener } from "../application/ports";
-import { toServerQuery } from "../application/server-query";
+import { computeGridView } from "../application/grid-view";
+import { toServerQuery, type GridQueryListener } from "../application/server-query";
 import { getUniqueValues } from "../domain/filtering";
-import { clampPageIndex } from "../domain/pagination";
 import {
   hasServerProcessing,
   resolveFilterMode,
   resolveProcessingModes,
   type ProcessingModesOption,
 } from "../domain/processing-modes";
-import { getSelectionStatus, type SelectionStatus } from "../domain/row-selection";
+import { clampPageIndex, getSelectionStatus, isRowSelected, type SelectionStatus } from "../domain/rows";
 import type {
+  Accessor,
   FilterValues,
   GridState,
   ProcessingMode,
@@ -37,23 +29,17 @@ import type {
   RowId,
   SortingState,
 } from "../domain/types";
-import { useDataGridConfig } from "./config-context";
+import { useDataGridConfig } from "./context";
 import { searchFilter } from "./filters";
-import type {
-  ColumnDef,
-  FilterOption,
-  GridFilterDef,
-  GridFiltersOption,
-} from "./types";
+import type { ColumnDef, FilterOption, GridFilterDef, GridFiltersOption } from "./types";
 
-const DEFAULT_PAGE_SIZE_OPTIONS: readonly number[] = [10, 25, 50, 100];
-const DEFAULT_SERVER_INPUT_DEBOUNCE_MS = 300;
 const EMPTY: readonly never[] = [];
 
 export type DataGridOptions<TRow> = {
   data: readonly TRow[] | undefined;
   columns: readonly ColumnDef<TRow>[];
   filters?: GridFiltersOption<TRow>;
+  /** Defaults to the row's `id`, else its index in `data`: give rows an `id` when pagination runs on the server. */
   getRowId?: (row: TRow, index: number) => RowId;
   mode?: ProcessingModesOption;
   rowCount?: number;
@@ -121,127 +107,126 @@ export type DataGridInstance<TRow> = {
   };
 };
 
-export function useDataGrid<TRow>(
-  options: DataGridOptions<TRow>,
-): DataGridInstance<TRow> {
+export function useDataGrid<TRow>({
+  columns,
+  data = EMPTY,
+  defaultPageSize = DEFAULT_PAGE_SIZE,
+  enableMultiSort = false,
+  enablePagination = true,
+  enableRowSelection = false,
+  filters: filtersOption,
+  getRowId = getDefaultRowId,
+  initialState,
+  mode = "client",
+  onQueryChange,
+  onStateChange,
+  pageSizeOptions,
+  rowCount,
+  serverInputDebounceMs = 300,
+  state: controlledState,
+}: DataGridOptions<TRow>): DataGridInstance<TRow> {
   const config = useDataGridConfig();
-  const {
-    columns,
-    data = EMPTY,
-    defaultPageSize = DEFAULT_PAGE_SIZE,
-    enableMultiSort = false,
-    enablePagination = true,
-    enableRowSelection = false,
-    filters: filtersOption,
-    getRowId = getDefaultRowId,
-    mode,
-    onQueryChange,
-    onStateChange,
-    pageSizeOptions = config.pageSizeOptions ?? DEFAULT_PAGE_SIZE_OPTIONS,
-    rowCount,
-    serverInputDebounceMs = DEFAULT_SERVER_INPUT_DEBOUNCE_MS,
-  } = options;
-
-  const filters = useMemo(() => resolveFilters(filtersOption), [filtersOption]);
-
-  const modesKey = JSON.stringify(mode ?? "client");
-  const modes = useMemo(
-    () => resolveProcessingModes(JSON.parse(modesKey) as ProcessingModesOption),
-    [modesKey],
+  const filters = useMemo(
+    () =>
+      typeof filtersOption === "function"
+        ? filtersOption([searchFilter()])
+        : (filtersOption ?? [searchFilter<TRow>()]),
+    [filtersOption],
   );
+  const modesKey = JSON.stringify(mode);
+  const modes = useMemo(() => resolveProcessingModes(JSON.parse(modesKey) as ProcessingModesOption), [modesKey]);
 
-  const [internalState, setInternalState] = useState(() =>
-    createGridState(options.initialState, defaultPageSize),
+  const [internalState, setInternalState] = useState(() => createGridState(initialState, defaultPageSize));
+  const { columnFilters, filters: filterValues, pagination, rowSelection, sorting } = controlledState ?? {};
+  const state = useMemo(
+    () => mergeGridState(internalState, { columnFilters, filters: filterValues, pagination, rowSelection, sorting }),
+    [columnFilters, filterValues, internalState, pagination, rowSelection, sorting],
   );
-  const state = mergeGridState(internalState, options.state);
-
   const viewState = useDeferredValue(state);
-  const isProcessing = viewKey(viewState) !== viewKey(state);
+
+  const view = useMemo(
+    () => computeGridView({ columns, data, filters, modes, paginate: enablePagination, rowCount, state: viewState }),
+    [columns, data, enablePagination, filters, modes, rowCount, viewState],
+  );
+  const rowIds = useMemo(() => new Map(data.map((row, index) => [row, getRowId(row, index)])), [data, getRowId]);
+  const rows = useMemo(
+    () => view.rows.map((row, index) => ({ id: rowIds.get(row) ?? getRowId(row, index), original: row })),
+    [getRowId, rowIds, view.rows],
+  );
+
+  const [pickedRows, setPickedRows] = useState(new Map<RowId, TRow>());
+  const selectedRows = useMemo(() => {
+    const loaded = new Map([...rowIds].map(([row, id]) => [id, row]));
+
+    return Object.keys(state.rowSelection)
+      .filter((id) => isRowSelected(state.rowSelection, id))
+      .flatMap((id) => (loaded.has(id) ? [loaded.get(id) as TRow] : pickedRows.has(id) ? [pickedRows.get(id) as TRow] : []));
+  }, [pickedRows, rowIds, state.rowSelection]);
+
+  const selectOptions = useMemo(() => {
+    const optionsOf = (accessor: Accessor<TRow> | undefined) =>
+      getUniqueValues(data, accessor).map((value) => ({ label: value, value }));
+
+    return {
+      columns: Object.fromEntries(
+        columns
+          .filter((column) => modes.columnFilters === "client" && column.filter?.variant === "select" && !column.filter.options)
+          .map((column) => [column.id, optionsOf(column.accessor)]),
+      ),
+      filters: Object.fromEntries(
+        filters
+          .filter((filter) => filter.variant === "select" && !filter.options && resolveFilterMode(filter, modes) === "client")
+          .map((filter) => [filter.id, optionsOf(filter.accessor)]),
+      ),
+    };
+  }, [columns, data, filters, modes]);
+
+  const notifiedQuery = useRef<string>(undefined);
+  const serverQuery = hasServerProcessing(modes, filters) ? JSON.stringify(toServerQuery(state, modes, filters)) : undefined;
+  const notifyQueryChange = useEffectEvent(() => onQueryChange?.(toServerQuery(state, modes, filters)));
+
+  useEffect(() => {
+    if (serverQuery !== undefined && serverQuery !== notifiedQuery.current) {
+      notifiedQuery.current = serverQuery;
+      notifyQueryChange();
+    }
+  }, [serverQuery]);
+
+  const pastLastPage =
+    modes.pagination === "server" && Boolean(rowCount) && state.pagination.pageIndex >= view.pageCount;
+  const goToLastPage = useEffectEvent(() => dispatch({ pageIndex: view.pageCount - 1, type: "setPageIndex" }));
+
+  useEffect(() => {
+    if (pastLastPage) {
+      goToLastPage();
+    }
+  }, [pastLastPage]);
 
   function dispatch(action: GridAction) {
     const next = gridReducer(state, action);
 
-    if (next === state) {
-      return;
+    if (next !== state) {
+      setInternalState(next);
+      onStateChange?.(next);
     }
-
-    setInternalState(next);
-    onStateChange?.(next);
   }
 
-  const view = useMemo(
-    () =>
-      computeGridView({
-        columns,
-        data,
-        filters,
-        modes,
-        paginate: enablePagination,
-        rowCount,
-        state: viewState,
-      }),
-    [columns, data, enablePagination, filters, modes, rowCount, viewState],
-  );
+  function select(rowIds: readonly RowId[], selected: boolean) {
+    const picked = rows.filter((row) => rowIds.includes(row.id)).map((row) => [row.id, row.original] as const);
 
-  const selectOptions = useMemo(
-    () => computeSelectOptions({ columns, data, filters, modes }),
-    [columns, data, filters, modes],
-  );
+    setPickedRows((known) => new Map([...known, ...picked]));
+    dispatch({ rowIds, selected, type: "setRowsSelected" });
+  }
 
-  const rowIndexes = useMemo(
-    () => new Map(data.map((row, index) => [row, index] as const)),
-    [data],
-  );
-
-  const rows = useMemo(
-    () =>
-      view.rows.map((row) => ({
-        id: getRowId(row, rowIndexes.get(row) ?? 0),
-        original: row,
-      })),
-    [getRowId, rowIndexes, view.rows],
-  );
-
-  const selectedRows = useMemo(
-    () => data.filter((row, index) => state.rowSelection[getRowId(row, index)]),
-    [data, getRowId, state.rowSelection],
-  );
-
-  const serverQueryKey = hasServerProcessing(modes, filters)
-    ? JSON.stringify(toServerQuery(state, modes, filters))
-    : undefined;
-  const notifiedQueryKey = useRef<string | undefined>(undefined);
-  const notifyQueryChange = useEffectEvent(() => {
-    onQueryChange?.(toServerQuery(state, modes, filters));
-  });
-
-  useEffect(() => {
-    if (
-      serverQueryKey === undefined ||
-      serverQueryKey === notifiedQueryKey.current
-    ) {
-      return;
-    }
-
-    notifiedQueryKey.current = serverQueryKey;
-    notifyQueryChange();
-  }, [serverQueryKey]);
-
-  const debounceFor = (processingMode: ProcessingMode) =>
-    processingMode === "server" ? serverInputDebounceMs : 0;
+  const debounceFor = (processingMode: ProcessingMode) => (processingMode === "server" ? serverInputDebounceMs : 0);
   const pageRowIds = rows.map((row) => row.id);
-  const pageIndex =
-    modes.pagination === "server"
-      ? state.pagination.pageIndex
-      : clampPageIndex(state.pagination.pageIndex, view.pageCount);
 
   return {
     columns,
     filters: {
       column: {
         debounceMs: debounceFor(modes.columnFilters),
-        getOptions: (column) =>
-          column.filter?.options ?? selectOptions.columns[column.id] ?? EMPTY,
+        getOptions: (column) => column.filter?.options ?? selectOptions.columns[column.id] ?? EMPTY,
         set: (id, value) => dispatch({ id, type: "setColumnFilter", value }),
         values: state.columnFilters,
       },
@@ -250,42 +235,45 @@ export function useDataGrid<TRow>(
       toolbar: {
         definitions: filters,
         getDebounceMs: (filter) => debounceFor(resolveFilterMode(filter, modes)),
-        getOptions: (filter) =>
-          filter.options ?? selectOptions.filters[filter.id] ?? EMPTY,
+        getOptions: (filter) => filter.options ?? selectOptions.filters[filter.id] ?? EMPTY,
         set: (id, value) => dispatch({ id, type: "setFilter", value }),
         values: state.filters,
       },
     },
-    isProcessing,
+    isProcessing: viewKey(viewState) !== viewKey(state),
     modes,
     pagination: {
       enabled: enablePagination,
       pageCount: view.pageCount,
-      pageIndex,
+      pageIndex:
+        modes.pagination === "server"
+          ? state.pagination.pageIndex
+          : clampPageIndex(state.pagination.pageIndex, view.pageCount),
       pageSize: state.pagination.pageSize,
-      pageSizeOptions,
+      pageSizeOptions: pageSizeOptions ?? config.pageSizeOptions ?? [10, 25, 50, 100],
       rowCount: view.rowCount,
-      setPageIndex: (next) => dispatch({ pageIndex: next, type: "setPageIndex" }),
+      setPageIndex: (pageIndex) => dispatch({ pageIndex, type: "setPageIndex" }),
       setPageSize: (pageSize) => dispatch({ pageSize, type: "setPageSize" }),
     },
     rows,
     selection: {
-      clear: () => dispatch({ type: "clearSelection" }),
+      clear: () => {
+        setPickedRows(new Map());
+        dispatch({ type: "clearSelection" });
+      },
       enabled: enableRowSelection,
-      isSelected: (rowId) => Boolean(state.rowSelection[rowId]),
+      isSelected: (rowId) => isRowSelected(state.rowSelection, rowId),
       pageStatus: getSelectionStatus(pageRowIds, state.rowSelection),
       selectedRows,
-      setPageSelected: (selected) =>
-        dispatch({ rowIds: pageRowIds, selected, type: "setRowsSelected" }),
-      setSelected: (rowId, selected) =>
-        dispatch({ rowIds: [rowId], selected, type: "setRowsSelected" }),
+      setPageSelected: (selected) => select(pageRowIds, selected),
+      setSelected: (rowId, selected) => select([rowId], selected),
     },
     sorting: {
       enableMulti: enableMultiSort,
       getDirection: (columnId) => {
         const sort = state.sorting.find(({ id }) => id === columnId);
 
-        return sort ? (sort.desc ? "desc" : "asc") : undefined;
+        return sort && (sort.desc ? "desc" : "asc");
       },
       state: state.sorting,
       toggle: (columnId, multi = false) =>
@@ -295,68 +283,12 @@ export function useDataGrid<TRow>(
   };
 }
 
-function resolveFilters<TRow>(
-  option: GridFiltersOption<TRow> | undefined,
-): readonly GridFilterDef<TRow>[] {
-  const defaults = [searchFilter<TRow>()];
-
-  if (typeof option === "function") {
-    return option(defaults);
-  }
-
-  return option ?? defaults;
-}
-
 function viewKey({ columnFilters, filters, pagination, sorting }: GridState) {
   return JSON.stringify([filters, columnFilters, sorting, pagination]);
 }
 
-function computeSelectOptions<TRow>({
-  columns,
-  data,
-  filters,
-  modes,
-}: {
-  columns: readonly ColumnDef<TRow>[];
-  data: readonly TRow[];
-  filters: readonly GridFilterDef<TRow>[];
-  modes: ProcessingModes;
-}) {
-  const options = {
-    columns: {} as Record<string, readonly FilterOption[]>,
-    filters: {} as Record<string, readonly FilterOption[]>,
-  };
-
-  if (modes.columnFilters === "client") {
-    for (const column of columns) {
-      if (column.filter?.variant === "select" && !column.filter.options) {
-        options.columns[column.id] = toOptions(getUniqueValues(data, column.accessor));
-      }
-    }
-  }
-
-  for (const filter of filters) {
-    if (
-      filter.variant === "select" &&
-      !filter.options &&
-      resolveFilterMode(filter, modes) === "client"
-    ) {
-      options.filters[filter.id] = toOptions(getUniqueValues(data, filter.accessor));
-    }
-  }
-
-  return options;
-}
-
 function getDefaultRowId(row: unknown, index: number): RowId {
-  const id =
-    typeof row === "object" && row !== null && "id" in row ? row.id : undefined;
+  const id = typeof row === "object" && row !== null && "id" in row ? row.id : undefined;
 
-  return typeof id === "string" || typeof id === "number"
-    ? String(id)
-    : String(index);
-}
-
-function toOptions(values: readonly string[]): readonly FilterOption[] {
-  return values.map((value) => ({ label: value, value }));
+  return typeof id === "string" || typeof id === "number" ? String(id) : String(index);
 }

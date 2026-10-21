@@ -25,7 +25,6 @@ const columns: ColumnDef<Book>[] = [
   { accessor: "publishedAt", header: "Published", id: "publishedAt" },
 ];
 
-// The search bar comes from `defaults`; the two filters after it are more links.
 const filters: GridFiltersOption<Book> = (defaults) => [
   ...defaults,
   selectFilter({ accessor: "genre", id: "genre", label: "Genre" }),
@@ -180,7 +179,6 @@ export const ColumnFiltersAndSorting: Story = {
     await userEvent.click(canvas.getByRole("button", { name: "Price" }));
     await waitFor(() => expect(priceHeader).toHaveAttribute("aria-sort", "descending"));
 
-    // One user-event session, so Shift stays held for the click.
     const user = userEvent.setup();
     await user.click(canvas.getByRole("button", { name: "Genre" }));
     await user.keyboard("{Shift>}");
@@ -241,6 +239,11 @@ export const RowActionsMenu: Story = {
     await expect(items[2]).toHaveFocus();
     await userEvent.keyboard("{Home}");
     await expect(items[0]).toHaveFocus();
+    await userEvent.keyboard("{Tab}");
+    await waitFor(() => expect(menu).not.toBeVisible());
+
+    await userEvent.click(canvas.getByRole("button", { name: "Actions for Baltagul" }));
+    await waitFor(() => expect(items[0]).toHaveFocus());
 
     await userEvent.click(items[0]);
     await expect(args.onEdit).toHaveBeenCalledWith(expect.objectContaining({ title: "Baltagul" }));

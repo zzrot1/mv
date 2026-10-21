@@ -1,0 +1,156 @@
+:where(.rc-side-panel) {
+  --_bg: var(--rc-background, light-dark(#ffffff, #0a0a0a));
+  --_fg: var(--rc-foreground, light-dark(#3f3f3f, #e5e5e5));
+  --_muted: var(--rc-muted-foreground, light-dark(#737373, #a3a3a3));
+  --_hover: var(--rc-accent, light-dark(#f6f6f4, #262626));
+  --_primary: var(--rc-primary, light-dark(#0e7490, #22d3ee));
+  --_border: var(--rc-border, light-dark(#ebebeb, rgb(255 255 255 / 0.1)));
+  --_strong: light-dark(#171717, #fafafa);
+  --_inverse: light-dark(#ffffff, #171717);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: var(--rc-side-panel-width, 280px);
+  height: 100%;
+  min-height: 0;
+  background: var(--_bg);
+  color: var(--_fg);
+  font-family: var(--rc-font-family, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  font-size: 15px;
+  line-height: 1.4;
+  transition: width 0.3s ease;
+}
+:where(.dark, [data-theme="dark"]) :where(.rc-side-panel) { color-scheme: dark; }
+:where(.light, [data-theme="light"]) :where(.rc-side-panel) { color-scheme: light; }
+div:where(.rc-side-panel[data-collapsed]) { width: var(--rc-side-panel-collapsed-width, 80px); }
+
+div:where(.rc-side-panel__header) { display: flex; align-items: center; gap: 8px; min-height: 40px; margin-bottom: 32px; padding: 32px 32px 8px; }
+div:where(.rc-side-panel[data-collapsed] .rc-side-panel__header) { justify-content: center; padding-inline: 16px; }
+button:where(.rc-side-panel__toggle, .rc-side-panel__close) {
+  position: relative;
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--_muted);
+  cursor: pointer;
+}
+button:where(.rc-side-panel__close) { border: 1px solid var(--_border); }
+button:where(.rc-side-panel__toggle) + button:where(.rc-side-panel__close) { margin-inline-start: 0; }
+button:where(.rc-side-panel__toggle, .rc-side-panel__close):hover { background: var(--_hover); }
+button:where(.rc-side-panel__toggle) > svg { transition: transform 0.3s ease; }
+div:where(.rc-side-panel[data-collapsed]) button:where(.rc-side-panel__toggle) { margin: 0; }
+div:where(.rc-side-panel[data-collapsed]) button:where(.rc-side-panel__toggle) > svg { transform: rotate(180deg); }
+
+nav:where(.rc-side-panel__nav) { display: flex; flex: 1 1 auto; flex-direction: column; gap: 16px; min-height: 0; padding: 8px 16px; overflow-y: auto; scrollbar-width: thin; }
+div:where(.rc-side-panel__footer) { display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 8px; }
+div:where(.rc-side-panel__section) { display: flex; flex-direction: column; gap: 8px; }
+p:where(.rc-side-panel__section-label) { margin: 0; padding: 0 20px; color: var(--_muted); font-size: 12px; font-weight: 500; line-height: 20px; }
+
+:is(a, button):where(.rc-side-panel__item) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 16px 20px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+:is(a, button):where(.rc-side-panel__item:hover, .rc-side-panel__item[aria-current="page"]) { background: var(--_hover); color: var(--_primary); }
+:is(a, button):where(.rc-side-panel__item[aria-current="page"]) { font-weight: 500; }
+:is(a, button):where(.rc-side-panel__item, .rc-side-panel__toggle, .rc-side-panel__close, .rc-side-panel__account-trigger):focus-visible { outline: 2px solid var(--_primary); outline-offset: -2px; }
+:where(.rc-side-panel__item) > svg { flex-shrink: 0; width: 18px; height: 18px; }
+span:where(.rc-side-panel__badge) { margin-inline-start: -6px; padding: 2px 8px; border: 1px solid var(--_border); border-radius: 999px; background: var(--_bg); color: var(--_muted); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; line-height: 14px; text-transform: uppercase; }
+
+div:where(.rc-side-panel__account) { padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--_border); }
+button:where(.rc-side-panel__account-trigger) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--_hover);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+span:where(.rc-side-panel__avatar) { display: grid; flex-shrink: 0; place-items: center; width: 28px; height: 28px; overflow: hidden; border-radius: 5px; background: var(--_strong); color: var(--_inverse); font-size: 10px; font-weight: 600; }
+span:where(.rc-side-panel__avatar) > img { width: 100%; height: 100%; object-fit: cover; }
+span:where(.rc-side-panel__account-text) { display: grid; flex: 1; gap: 2px; min-width: 0; }
+span:where(.rc-side-panel__account-name, .rc-side-panel__account-description) { overflow: hidden; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+span:where(.rc-side-panel__account-name) { color: var(--_strong); font-size: 14px; font-weight: 500; }
+span:where(.rc-side-panel__account-description) { color: var(--_primary); font-size: 12px; font-weight: 500; }
+svg:where(.rc-side-panel__chevron) { flex-shrink: 0; width: 16px; height: 16px; color: var(--_muted); transition: transform 0.2s ease; }
+div:where(.rc-side-panel__account:has(:popover-open)) svg:where(.rc-side-panel__chevron) { transform: rotate(180deg); }
+
+div:where(.rc-side-panel__menu) {
+  position: fixed;
+  inset: auto;
+  box-sizing: border-box;
+  width: 240px;
+  max-width: calc(100vw - 16px);
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--_border);
+  border-radius: 8px;
+  background: var(--_bg);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.06);
+  color: var(--_fg);
+  font-size: 14px;
+}
+div:where(.rc-side-panel__menu-header) { padding: 6px 8px; }
+div:where(.rc-side-panel__menu) > div + div { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--_border); }
+div:where(.rc-side-panel__menu) :is(a, button):where(.rc-side-panel__item) { gap: 8px; padding: 6px 8px; border-radius: 4px; }
+div:where(.rc-side-panel__menu) :where(.rc-side-panel__item) > svg { width: 16px; height: 16px; }
+
+div:where(.rc-side-panel[data-collapsed]) :is(nav, div):where(.rc-side-panel__nav, .rc-side-panel__footer) { align-items: center; overflow: visible; }
+:where(.rc-side-panel[data-collapsed]) :where(.rc-side-panel__nav, .rc-side-panel__footer) :is(a, button):where(.rc-side-panel__item) { justify-content: center; width: auto; padding: 16px; }
+div:where(.rc-side-panel[data-collapsed]) button:where(.rc-side-panel__account-trigger) { justify-content: center; width: auto; margin-inline: auto; }
+:where(.rc-side-panel[data-collapsed]) :where(.rc-side-panel__nav, .rc-side-panel__footer, .rc-side-panel__account-trigger) :where(.rc-side-panel__label, .rc-side-panel__badge, .rc-side-panel__section-label, .rc-side-panel__chevron) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+:where(.rc-side-panel[data-collapsed]) [data-tooltip]:not(.rc-side-panel__menu *)::after {
+  content: attr(data-tooltip) / "";
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 8px);
+  z-index: 10;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--_strong);
+  color: var(--_inverse);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-4px, -50%);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+:where(.rc-side-panel[data-collapsed]) [data-tooltip]:is(:hover, :focus-visible)::after { opacity: 1; transform: translate(0, -50%); }

@@ -1,13 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import type {
-  Accessor,
-  ColumnModel,
-  GridFilterModel,
-  RowId,
-} from "../domain/types";
+import type { ColorScheme, Theme } from "../../shared/theme";
+import type { Accessor, ColumnModel, GridFilterModel, RowId } from "../domain/types";
 import type { GridLabels } from "./labels";
-import type { ColorScheme, GridTheme } from "./styles/theme";
 
 export type CellContext<TRow> = { row: TRow; rowId: RowId; value: unknown };
 
@@ -29,8 +24,7 @@ type FilterUi = {
 
 export type ControlVariant = "search" | "text" | "select" | "number-range" | "toggle";
 
-export type ColumnFilterDef<TRow> = NonNullable<ColumnModel<TRow>["filter"]> &
-  FilterUi;
+export type ColumnFilterDef<TRow> = NonNullable<ColumnModel<TRow>["filter"]> & FilterUi;
 
 export type ColumnDef<TRow> = Omit<ColumnModel<TRow>, "filter"> & {
   header: ReactNode;
@@ -55,12 +49,7 @@ export type GridFiltersOption<TRow> =
 
 export type ActionTone = "neutral" | "danger";
 
-type ActionBase = {
-  id: string;
-  label: string;
-  icon?: ReactNode;
-  tone?: ActionTone;
-};
+type ActionBase = { id: string; label: string; icon?: ReactNode; tone?: ActionTone };
 
 export type RowAction<TRow> = ActionBase & {
   onClick: (row: TRow) => unknown;
@@ -70,11 +59,7 @@ export type RowAction<TRow> = ActionBase & {
   separatorBefore?: boolean;
 };
 
-export type RowActionsRenderContext<TRow> = {
-  row: TRow;
-  rowId: RowId;
-  rowName: string;
-};
+export type RowActionsRenderContext<TRow> = { row: TRow; rowId: RowId; rowName: string };
 
 export type BulkAction<TRow> = ActionBase & {
   onClick: (rows: TRow[], context: { clearSelection: () => void }) => unknown;
@@ -127,6 +112,6 @@ export type GridAppearance = {
   labels?: Partial<GridLabels>;
   style?: CSSProperties;
   styles?: GridStyles;
-  theme?: GridTheme;
+  theme?: Theme;
   unstyled?: boolean;
 };

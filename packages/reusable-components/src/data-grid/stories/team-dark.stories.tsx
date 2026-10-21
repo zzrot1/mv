@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
+import type { ConfirmPort } from "../application/server-query";
 import { PageWithGrid, type PageWithGridProps } from "../page-with-grid";
 import { toggleFilter } from "../ui/filters";
 import type { ColumnDef, GridFiltersOption, RowAction } from "../ui/types";
@@ -71,7 +72,7 @@ function TeamDirectory({ onMessage, onRemove, ...props }: TeamDirectoryProps) {
 
 const meta = {
   args: {
-    confirm: fn(() => true),
+    confirm: fn<ConfirmPort>(() => true),
     onMessage: fn(),
     onRemove: fn(() => new Promise<void>((resolve) => setTimeout(resolve, 200))),
   },
@@ -109,7 +110,7 @@ export const InlineActions: Story = {
     const remove = canvas.getByRole("button", { name: "Remove Bogdan Ionescu" });
     await userEvent.click(remove);
     await expect(args.confirm).toHaveBeenCalledWith("Remove this member from the team?");
-    await waitFor(() => expect(remove).toBeDisabled());
+    await waitFor(() => expect(remove).toHaveAttribute("aria-disabled", "true"));
     await waitFor(() => expect(canvas.queryByText("Bogdan Ionescu")).toBeNull());
     await expect(args.onRemove).toHaveBeenCalledTimes(1);
     await expect(canvas.getByText("1–10 of 15")).toBeVisible();

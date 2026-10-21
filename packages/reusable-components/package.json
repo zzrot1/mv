@@ -1,7 +1,26 @@
 {
   "name": "reusable-components",
   "version": "0.1.0",
-  "description": "Reusable React components on a headless, framework-free core",
+  "description": "Accessible, themeable React 19 components: a data grid and form inputs on a headless core",
+  "keywords": [
+    "react",
+    "react-19",
+    "components",
+    "data-grid",
+    "table",
+    "inputs",
+    "form",
+    "accessible",
+    "headless",
+    "themeable"
+  ],
+  "homepage": "https://github.com/zzrot1/mv/tree/main/packages/reusable-components#readme",
+  "bugs": "https://github.com/zzrot1/mv/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzrot1/mv.git",
+    "directory": "packages/reusable-components"
+  },
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
@@ -12,17 +31,27 @@
   "files": [
     "src",
     "!src/**/stories",
+    "!src/**/tests",
+    "!src/**/*.test.*",
     "README.md"
   ],
   "scripts": {
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test": "vitest run --project storybook",
-    "test:watch": "vitest --project storybook",
-    "test:coverage": "vitest run --project storybook --coverage",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:stories": "vitest run --project storybook",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "peerDependencies": {
+    "react": ">=19.2.0",
+    "react-dom": ">=19.2.0"
+  },
   "devDependencies": {
     "@storybook/addon-a11y": "^10.6.2",
     "@storybook/addon-docs": "^10.6.2",
@@ -36,6 +65,7 @@
     "react-dom": "^19.2.8",
     "storybook": "^10.6.2",
     "vite": "^8.3.4",
-    "vitest": "^5.0.4"
+    "vitest": "^5.0.4",
+    "vitest-browser-react": "^2.3.0"
   }
 }

@@ -109,7 +109,6 @@ export const roleOptions = (["Admin", "Editor", "Viewer"] as const).map((role) =
   value: role,
 }));
 
-// A tiny stand-in for a backend: it applies what the grid sends in `onQueryChange`.
 export function queryMembers(query: ServerGridQuery) {
   const search = normalizeText(query.filters?.search ?? "");
   const role = query.columnFilters?.role;

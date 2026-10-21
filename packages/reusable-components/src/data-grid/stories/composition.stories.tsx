@@ -2,25 +2,28 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
-import type { SortingState } from "../domain/types";
-import { PageWithGrid } from "../page-with-grid";
-import { DataGrid } from "../ui/components/data-grid";
-import { GridFilters } from "../ui/components/grid-filters";
-import { GridPagination } from "../ui/components/grid-pagination";
-import { GridTable } from "../ui/components/grid-table";
-import { GridResetFilters, GridToolbar } from "../ui/components/grid-toolbar";
-import { DataGridConfigProvider } from "../ui/config-context";
 import {
   customFilter,
+  DataGrid,
+  DataGridConfigProvider,
   defineColumnFilter,
+  GridFilters,
+  GridPagination,
+  GridResetFilters,
+  GridTable,
+  GridToolbar,
   numberRangeFilter,
+  PageWithGrid,
   searchFilter,
   selectFilter,
   textFilter,
-} from "../ui/filters";
-import type { GridLabels } from "../ui/labels";
-import type { ColumnDef, GridFilterDef, RowAction } from "../ui/types";
-import { useDataGrid } from "../ui/use-data-grid";
+  useDataGrid,
+  type ColumnDef,
+  type GridFilterDef,
+  type GridLabels,
+  type RowAction,
+  type SortingState,
+} from "../index";
 import { members, roleOptions, type Member } from "./fixtures";
 import { bodyRows, columnValues, find, setInputValue } from "./test-utils";
 
@@ -37,8 +40,6 @@ const deleteAction = (onDelete: (person: Member) => void): RowAction<Member> => 
   onClick: onDelete,
   tone: "danger",
 });
-
-// ---------------------------------------------------------------------------
 
 const romanian: Partial<GridLabels> = {
   filterBy: (column) => `Filtrează după ${column}`,
@@ -70,8 +71,6 @@ function TranslatedGrid({ confirm, onDelete }: { confirm: () => boolean; onDelet
     </DataGridConfigProvider>
   );
 }
-
-// ---------------------------------------------------------------------------
 
 const teamPicker = defineColumnFilter<Member, string>({
   fn: (cellValue, team) => cellValue === team,
@@ -108,7 +107,7 @@ const composedFilters: GridFilterDef<Member>[] = [
     id: "minAge",
     label: "Minimum age",
     render: ({ setValue, value }) => (
-      <label className="rc-toggle">
+      <label className="rc-grid__toggle">
         Age ≥ {value ?? 20}
         <input
           aria-label="Minimum age"
@@ -161,8 +160,6 @@ function ComposedTeam({ onOpen }: { onOpen: (person: Member) => void }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-
 function ControlledSorting({ onStateChange }: { onStateChange: (sorting: SortingState) => void }) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -186,8 +183,6 @@ function ControlledSorting({ onStateChange }: { onStateChange: (sorting: Sorting
   );
 }
 
-// ---------------------------------------------------------------------------
-
 function NearTheBottom({ onDelete }: { onDelete: (person: Member) => void }) {
   return (
     <div style={{ paddingTop: "100vh" }}>
@@ -200,8 +195,6 @@ function NearTheBottom({ onDelete }: { onDelete: (person: Member) => void }) {
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
 
 const meta = {
   title: "Data grid/Composition",
@@ -296,7 +289,6 @@ export const PopoversNearTheBottom: StoryObj<typeof NearTheBottom> = {
     await waitFor(() =>
       expect(dialog.getBoundingClientRect().bottom).toBeLessThanOrEqual(trigger.getBoundingClientRect().top),
     );
-    // Right-aligned with its trigger once the entry animation has settled.
     await waitFor(() =>
       expect(Math.round(dialog.getBoundingClientRect().right)).toBe(
         Math.round(trigger.getBoundingClientRect().right),

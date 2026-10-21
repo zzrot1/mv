@@ -3,15 +3,16 @@
 import type { ReactNode } from "react";
 
 import { cx } from "../../../shared/class-names";
-import type { ConfirmPort } from "../../application/ports";
-import { useDataGridConfig } from "../config-context";
-import { DataGridContext, type DataGridContextValue } from "../grid-context";
+import { createSlotResolver } from "../../../shared/slots";
+import { themeToStyle } from "../../../shared/theme";
+import type { ConfirmPort } from "../../application/server-query";
+import { GridProvider, useDataGridConfig } from "../context";
 import { defaultGridLabels } from "../labels";
-import { createSlotResolver } from "../slots";
-import { GridStyles } from "../styles/grid-styles";
-import { themeToStyle } from "../styles/theme";
 import type { GridAppearance } from "../types";
 import type { DataGridInstance } from "../use-data-grid";
+
+import "../../../shared/base.css";
+import "../styles.css";
 
 export type DataGridProps<TRow> = GridAppearance & {
   grid: DataGridInstance<TRow>;
@@ -33,30 +34,27 @@ export function DataGrid<TRow>({
   unstyled = false,
 }: DataGridProps<TRow>) {
   const config = useDataGridConfig();
-  const slot = createSlotResolver(classNames, styles);
-  const context: DataGridContextValue<TRow> = {
-    confirm: confirm ?? config.confirm ?? confirmInBrowser,
-    grid,
-    labels: { ...defaultGridLabels, ...config.labels, ...labels },
-    slot,
-  };
+  const slot = createSlotResolver(classNames, styles, unstyled);
+  const root = slot("root", "rc-root rc-grid", { ...themeToStyle(theme), ...style });
 
   return (
-    <DataGridContext value={context as unknown as DataGridContextValue<unknown>}>
-      {unstyled ? null : <GridStyles />}
-      <div
-        {...slot("root", cx("rc-root rc-grid", className), {
-          ...themeToStyle(theme),
-          ...style,
-        })}
-        data-color-scheme={colorScheme}
-      >
+    <GridProvider
+      value={{
+        confirm: confirm ?? config.confirm ?? confirmInBrowser,
+        css: (builtIn) => (unstyled ? undefined : builtIn),
+        grid,
+        labels: { ...defaultGridLabels, ...config.labels, ...labels },
+        slot,
+        unstyled,
+      }}
+    >
+      <div className={cx(root.className, className)} data-color-scheme={colorScheme} style={root.style}>
         {children}
       </div>
-    </DataGridContext>
+    </GridProvider>
   );
 }
 
 function confirmInBrowser(message: string) {
-  return typeof window === "undefined" || window.confirm(message);
+  return typeof window !== "undefined" && window.confirm(message);
 }

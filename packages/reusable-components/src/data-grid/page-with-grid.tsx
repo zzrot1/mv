@@ -3,15 +3,14 @@
 import { useId, type ReactNode } from "react";
 
 import { cx } from "../shared/class-names";
-import type { ConfirmPort } from "./application/ports";
+import { createSlotResolver } from "../shared/slots";
+import { themeToStyle } from "../shared/theme";
+import type { ConfirmPort } from "./application/server-query";
+import { GridBulkActions } from "./ui/components/actions";
 import { DataGrid } from "./ui/components/data-grid";
-import { GridBulkActions } from "./ui/components/grid-bulk-actions";
-import { GridFilters } from "./ui/components/grid-filters";
-import { GridPagination } from "./ui/components/grid-pagination";
-import { GridTable, type GridTableProps } from "./ui/components/grid-table";
-import { GridResetFilters, GridToolbar } from "./ui/components/grid-toolbar";
-import { createSlotResolver } from "./ui/slots";
-import { themeToStyle } from "./ui/styles/theme";
+import { GridPagination } from "./ui/components/pagination";
+import { GridTable, type GridTableProps } from "./ui/components/table";
+import { GridFilters, GridResetFilters, GridToolbar } from "./ui/components/toolbar";
 import type { BulkAction, GridAppearance } from "./ui/types";
 import { useDataGrid, type DataGridOptions } from "./ui/use-data-grid";
 
@@ -22,7 +21,7 @@ export type PageWithGridProps<TRow> = DataGridOptions<TRow> &
     description?: ReactNode;
     headerActions?: ReactNode;
     toolbarActions?: ReactNode;
-    // Turns on row selection.
+    /** Turns on row selection. */
     bulkActions?: readonly BulkAction<TRow>[];
     confirm?: ConfirmPort;
   };
@@ -52,26 +51,21 @@ export function PageWithGrid<TRow>({
   title,
   toolbarActions,
   unstyled,
-  ...gridOptions
+  ...options
 }: PageWithGridProps<TRow>) {
   const titleId = useId();
-  const grid = useDataGrid({
-    ...gridOptions,
-    enableRowSelection: gridOptions.enableRowSelection ?? bulkActions.length > 0,
-  });
-  const slot = createSlotResolver(classNames, styles);
-  const hasHeader = Boolean(title || description || headerActions);
+  const grid = useDataGrid({ ...options, enableRowSelection: options.enableRowSelection ?? bulkActions.length > 0 });
+  const slot = createSlotResolver(classNames, styles, unstyled);
+  const page = slot("page", "rc-root rc-page", { ...themeToStyle(theme), ...style });
 
   return (
     <section
-      {...slot("page", cx("rc-root rc-page", className), {
-        ...themeToStyle(theme),
-        ...style,
-      })}
       aria-labelledby={title ? titleId : undefined}
+      className={cx(page.className, className)}
       data-color-scheme={colorScheme}
+      style={page.style}
     >
-      {hasHeader ? (
+      {title || description || headerActions ? (
         <header {...slot("pageHeader", "rc-page__header")}>
           <div>
             {title ? (
@@ -79,13 +73,9 @@ export function PageWithGrid<TRow>({
                 {title}
               </h1>
             ) : null}
-            {description ? (
-              <p {...slot("pageDescription", "rc-page__description")}>{description}</p>
-            ) : null}
+            {description ? <p {...slot("pageDescription", "rc-page__description")}>{description}</p> : null}
           </div>
-          {headerActions ? (
-            <div {...slot("pageActions", "rc-page__actions")}>{headerActions}</div>
-          ) : null}
+          {headerActions ? <div {...slot("pageActions", "rc-page__actions")}>{headerActions}</div> : null}
         </header>
       ) : null}
 
@@ -101,9 +91,7 @@ export function PageWithGrid<TRow>({
         <GridToolbar>
           <GridFilters />
           <GridResetFilters />
-          {toolbarActions ? (
-            <div className="rc-grid__toolbar-end">{toolbarActions}</div>
-          ) : null}
+          {toolbarActions ? <div className={unstyled ? undefined : "rc-grid__toolbar-end"}>{toolbarActions}</div> : null}
         </GridToolbar>
         <GridBulkActions actions={bulkActions} />
         <GridTable

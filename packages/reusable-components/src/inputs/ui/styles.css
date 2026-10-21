@@ -1,0 +1,244 @@
+:where(.rc-root[data-size="sm"]) {
+  --_size-height: var(--rc-control-height-sm, 32px);
+  --_size-padding: 10px;
+  --_size-text: 0.8125rem;
+  --_size-box: 14px;
+}
+:where(.rc-root[data-size="md"]) {
+  --_size-height: var(--rc-control-height, 36px);
+  --_size-padding: 12px;
+  --_size-text: var(--rc-font-size, 0.875rem);
+  --_size-box: 16px;
+}
+:where(.rc-root[data-size="lg"]) {
+  --_size-height: var(--rc-control-height-lg, 40px);
+  --_size-padding: 14px;
+  --_size-text: 1rem;
+  --_size-box: 20px;
+}
+
+div:where(.rc-frame) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--_size-height);
+  border: 1px solid var(--_input);
+  border-radius: var(--_radius);
+  background-color: var(--_control-background);
+  box-shadow: var(--_shadow-xs);
+  font-size: var(--_size-text);
+  cursor: text;
+  transition: border-color 150ms, box-shadow 150ms, background-color 150ms;
+}
+div:where(.rc-frame[data-variant="filled"], .rc-frame[data-variant="ghost"]) { --_muted-foreground: var(--rc-muted-foreground, light-dark(#636363, #a3a3a3)); }
+div:where(.rc-frame[data-variant="filled"]) { border-color: transparent; background-color: var(--_muted); box-shadow: none; }
+div:where(.rc-frame[data-variant="ghost"]) { border-color: transparent; background-color: transparent; box-shadow: none; }
+div:where(.rc-frame[data-variant="ghost"]:hover) { background-color: var(--_accent); }
+div:where(.rc-frame:focus-within) { border-color: var(--_ring); box-shadow: var(--_focus-ring); }
+div:where(.rc-frame[data-invalid]) { border-color: var(--_destructive); }
+div:where(.rc-frame[data-invalid]:focus-within) { box-shadow: var(--_invalid-ring); }
+div:where(.rc-frame[data-disabled]) { cursor: not-allowed; opacity: 0.5; }
+
+input:where(.rc-input__control), textarea:where(.rc-textarea__control), select:where(.rc-select__control) {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+input:where(.rc-input__control) { height: calc(var(--_size-height) - 2px); padding: 0 var(--_size-padding); }
+input:where(.rc-input__control)::placeholder, textarea:where(.rc-textarea__control)::placeholder { color: var(--_muted-foreground); opacity: 1; }
+input:where(.rc-input__control:disabled), textarea:where(.rc-textarea__control:disabled), select:where(.rc-select__control:disabled) { cursor: not-allowed; }
+input:where(.rc-input__control)::-webkit-search-cancel-button,
+input:where(.rc-input__control)::-webkit-search-decoration { appearance: none; -webkit-appearance: none; }
+span:where(.rc-input__prefix), span:where(.rc-input__suffix) {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  align-self: stretch;
+  gap: 6px;
+  color: var(--_muted-foreground);
+}
+span:where(.rc-input__prefix) { padding-inline-start: var(--_size-padding); }
+span:where(.rc-input__suffix) { padding-inline-end: var(--_size-padding); }
+span:where(.rc-input__prefix) + input:where(.rc-input__control) { padding-inline-start: 8px; }
+input:where(.rc-input__control):has(+ span.rc-input__suffix) { padding-inline-end: 8px; }
+span:where(.rc-input__prefix) svg, span:where(.rc-input__suffix) svg { flex-shrink: 0; }
+
+button:where(.rc-input__button) {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-inline: -4px;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--_radius) - 2px);
+  background: transparent;
+  color: var(--_muted-foreground);
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms, color 150ms;
+}
+button:where(.rc-input__button:hover:not(:disabled)) { background: var(--_accent); color: var(--_foreground); }
+button:where(.rc-input__button:focus-visible) { box-shadow: var(--_focus-ring); color: var(--_foreground); }
+button:where(.rc-input__button:disabled) { cursor: not-allowed; }
+
+span:where(.rc-number__suffix) { padding-inline-end: 0; }
+span:where(.rc-number__stepper) {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  border-inline-start: 1px solid var(--_input);
+}
+button:where(.rc-number__step) {
+  display: grid;
+  flex: 1 1 0;
+  place-items: center;
+  width: 28px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--_muted-foreground);
+  cursor: pointer;
+  transition: background-color 150ms, color 150ms;
+}
+button:where(.rc-number__step) + button:where(.rc-number__step) { border-top: 1px solid var(--_input); }
+button:where(.rc-number__step:first-child) { border-start-end-radius: calc(var(--_radius) - 1px); }
+button:where(.rc-number__step:last-child) { border-end-end-radius: calc(var(--_radius) - 1px); }
+button:where(.rc-number__step:hover:not(:disabled)) { background: var(--_accent); color: var(--_foreground); }
+button:where(.rc-number__step:disabled) { cursor: not-allowed; opacity: 0.5; }
+
+div:where(.rc-textarea) { flex-direction: column; align-items: stretch; }
+textarea:where(.rc-textarea__control) {
+  display: block;
+  min-height: calc(var(--_size-height) * 1.75);
+  padding: 8px var(--_size-padding);
+  line-height: 1.5;
+  resize: vertical;
+}
+textarea:where(.rc-textarea__control[data-auto-resize]) { overflow-y: hidden; resize: none; }
+span:where(.rc-textarea__count) {
+  align-self: flex-end;
+  padding: 0 var(--_size-padding) 6px;
+  color: var(--_muted-foreground);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+span:where(.rc-textarea__count[data-over]) { color: var(--_destructive); }
+
+div:where(.rc-select) { cursor: pointer; }
+select:where(.rc-select__control) {
+  height: calc(var(--_size-height) - 2px);
+  padding-block: 0;
+  padding-inline: var(--_size-padding) calc(var(--_size-padding) + 22px);
+  appearance: none;
+  cursor: inherit;
+}
+span:where(.rc-input__prefix) + select:where(.rc-select__control) { padding-inline-start: 8px; }
+select:where(.rc-select__control):has(option.rc-select__placeholder:checked) { color: var(--_muted-foreground); }
+select:where(.rc-select__control) option, select:where(.rc-select__control) optgroup { background: var(--_background); color: var(--_foreground); }
+span:where(.rc-select__icon) {
+  position: absolute;
+  display: flex;
+  inset-inline-end: var(--_size-padding);
+  top: 50%;
+  color: var(--_muted-foreground);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+label:where(.rc-checkbox), label:where(.rc-switch) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--_size-text);
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+}
+label:where(.rc-checkbox[data-disabled]), label:where(.rc-switch[data-disabled]) { cursor: not-allowed; opacity: 0.5; }
+
+input:where(.rc-checkbox__control) {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-content: center;
+  box-sizing: border-box;
+  width: var(--_size-box);
+  height: var(--_size-box);
+  margin: 0;
+  border: 1px solid var(--_input);
+  border-radius: 4px;
+  background: var(--_control-background);
+  box-shadow: var(--_shadow-xs);
+  appearance: none;
+  cursor: inherit;
+  outline: none;
+  transition: background-color 150ms, border-color 150ms, box-shadow 150ms;
+}
+input:where(.rc-checkbox__control)::before {
+  content: "";
+  width: calc(var(--_size-box) * 0.625);
+  height: calc(var(--_size-box) * 0.625);
+  background: var(--_primary-foreground);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transform: scale(0);
+  transition: transform 120ms ease-out;
+}
+input:where(.rc-checkbox__control:checked), input:where(.rc-checkbox__control:indeterminate) { border-color: var(--_primary); background: var(--_primary); }
+input:where(.rc-checkbox__control:checked)::before { transform: scale(1); }
+input:where(.rc-checkbox__control:indeterminate)::before { clip-path: inset(40% 5% round 1px); transform: scale(1); }
+
+input:where(.rc-switch__control) {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  box-sizing: border-box;
+  width: calc(var(--_size-box) * 2);
+  height: calc(var(--_size-box) + 2px);
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--_input);
+  box-shadow: var(--_shadow-xs);
+  appearance: none;
+  cursor: inherit;
+  outline: none;
+  transition: background-color 150ms, box-shadow 150ms;
+}
+input:where(.rc-switch__control)::before {
+  content: "";
+  width: var(--_size-box);
+  height: var(--_size-box);
+  border-radius: 50%;
+  background: light-dark(var(--_background), var(--_foreground));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+  transition: transform 150ms ease-out;
+}
+input:where(.rc-switch__control:checked) { background: var(--_primary); }
+input:where(.rc-switch__control:checked)::before { background: var(--_primary-foreground); transform: translateX(calc(var(--_size-box) - 2px)); }
+input:where(.rc-switch__control:checked:dir(rtl))::before { transform: translateX(calc(2px - var(--_size-box))); }
+
+input:where(.rc-checkbox__control:focus-visible), input:where(.rc-switch__control:focus-visible) { border-color: var(--_ring); box-shadow: var(--_focus-ring); }
+input:where(.rc-checkbox__control[aria-invalid="true"]), input:where(.rc-switch__control[aria-invalid="true"]) { border-color: var(--_destructive); }
+input:where(.rc-checkbox__control[aria-invalid="true"]:focus-visible), input:where(.rc-switch__control[aria-invalid="true"]:focus-visible) { box-shadow: var(--_invalid-ring); }
+
+div:where(.rc-field) { display: grid; gap: 6px; min-width: 0; font-size: var(--_size-text); }
+label:where(.rc-field__label) { display: flex; align-items: center; gap: 4px; width: fit-content; font-weight: 500; line-height: 1.25; }
+div:where(.rc-field[data-invalid]) label:where(.rc-field__label) { color: var(--_destructive); }
+div:where(.rc-field[data-disabled]) label:where(.rc-field__label) { cursor: not-allowed; opacity: 0.5; }
+span:where(.rc-field__required) { color: var(--_destructive); }
+p:where(.rc-field__description), p:where(.rc-field__error) { margin: 0; font-size: 0.8125rem; line-height: 1.4; }
+p:where(.rc-field__description) { color: var(--_muted-foreground); }
+p:where(.rc-field__error) { color: var(--_destructive); }

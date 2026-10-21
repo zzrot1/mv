@@ -1,5 +1,5 @@
-import { isActiveFilterValue } from "../domain/filter-fns";
-import { setRowsSelected } from "../domain/row-selection";
+import { isActiveFilterValue } from "../domain/filtering";
+import { setRowsSelected } from "../domain/rows";
 import type {
   FilterValues,
   GridState,
@@ -57,7 +57,6 @@ export function hasActiveFilters(state: GridState) {
   );
 }
 
-// Narrowing the rows always goes back to the first page.
 export function gridReducer(state: GridState, action: GridAction): GridState {
   switch (action.type) {
     case "setFilter":
@@ -73,7 +72,11 @@ export function gridReducer(state: GridState, action: GridAction): GridState {
         ? state
         : {
             ...state,
-            columnFilters: setFilterValue(state.columnFilters, action.id, action.value),
+            columnFilters: setFilterValue(
+              state.columnFilters,
+              action.id,
+              action.value,
+            ),
             pagination: firstPage(state.pagination),
           };
     case "resetFilters":
@@ -84,25 +87,37 @@ export function gridReducer(state: GridState, action: GridAction): GridState {
         pagination: firstPage(state.pagination),
       };
     case "toggleSorting":
-      return { ...state, sorting: toggleSorting(state.sorting, action.id, action.multi) };
+      return {
+        ...state,
+        sorting: toggleSorting(state.sorting, action.id, action.multi),
+      };
     case "setPageIndex":
       return {
         ...state,
-        pagination: { ...state.pagination, pageIndex: Math.max(0, action.pageIndex) },
+        pagination: {
+          ...state.pagination,
+          pageIndex: Math.max(0, action.pageIndex),
+        },
       };
     case "setPageSize":
-      return { ...state, pagination: { pageIndex: 0, pageSize: action.pageSize } };
+      return {
+        ...state,
+        pagination: { pageIndex: 0, pageSize: action.pageSize },
+      };
     case "setRowsSelected":
       return {
         ...state,
-        rowSelection: setRowsSelected(state.rowSelection, action.rowIds, action.selected),
+        rowSelection: setRowsSelected(
+          state.rowSelection,
+          action.rowIds,
+          action.selected,
+        ),
       };
     case "clearSelection":
       return { ...state, rowSelection: {} };
   }
 }
 
-// none -> ascending -> descending -> none
 export function toggleSorting(
   sorting: SortingState,
   id: string,
@@ -124,18 +139,14 @@ export function toggleSorting(
   return others;
 }
 
-function setFilterValue(values: FilterValues, id: string, value: unknown) {
-  const next: Record<string, unknown> = { ...values };
+function setFilterValue(values: FilterValues, id: string, value: unknown): FilterValues {
+  const others = Object.entries(values).filter(([key]) => key !== id);
 
-  if (isActiveFilterValue(value)) {
-    next[id] = value;
-  } else {
-    delete next[id];
-  }
-
-  return next;
+  return Object.fromEntries(isActiveFilterValue(value) ? [...others, [id, value]] : others);
 }
 
 function firstPage(pagination: PaginationState): PaginationState {
-  return pagination.pageIndex === 0 ? pagination : { ...pagination, pageIndex: 0 };
+  return pagination.pageIndex === 0
+    ? pagination
+    : { ...pagination, pageIndex: 0 };
 }

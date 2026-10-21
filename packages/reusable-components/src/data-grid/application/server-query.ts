@@ -1,43 +1,27 @@
 import { resolveFilterMode } from "../domain/processing-modes";
-import type {
-  FilterValues,
-  GridQuery,
-  GridState,
-  ProcessingMode,
-  ProcessingModes,
-} from "../domain/types";
+import type { GridQuery, GridState, ProcessingMode, ProcessingModes } from "../domain/types";
 
 export type ServerGridQuery = Partial<GridQuery>;
+
+export type ConfirmPort = (message: string) => boolean | Promise<boolean>;
+
+export type GridQueryListener = (query: ServerGridQuery) => void;
 
 export function toServerQuery(
   state: GridState,
   modes: ProcessingModes,
   filters: readonly { id: string; mode?: ProcessingMode }[],
 ): ServerGridQuery {
-  const serverFilterIds = filters
-    .filter((filter) => resolveFilterMode(filter, modes) === "server")
-    .map((filter) => filter.id);
+  const serverIds = new Set(
+    filters.filter((filter) => resolveFilterMode(filter, modes) === "server").map((filter) => filter.id),
+  );
 
   return {
-    ...(serverFilterIds.length
-      ? { filters: pickValues(state.filters, serverFilterIds) }
+    ...(serverIds.size
+      ? { filters: Object.fromEntries(Object.entries(state.filters).filter(([id]) => serverIds.has(id))) }
       : {}),
-    ...(modes.columnFilters === "server"
-      ? { columnFilters: state.columnFilters }
-      : {}),
+    ...(modes.columnFilters === "server" ? { columnFilters: state.columnFilters } : {}),
     ...(modes.sorting === "server" ? { sorting: state.sorting } : {}),
     ...(modes.pagination === "server" ? { pagination: state.pagination } : {}),
   };
-}
-
-function pickValues(values: FilterValues, ids: readonly string[]): FilterValues {
-  const picked: Record<string, unknown> = {};
-
-  for (const id of ids) {
-    if (id in values) {
-      picked[id] = values[id];
-    }
-  }
-
-  return picked;
 }

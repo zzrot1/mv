@@ -1,6 +1,5 @@
-import { isSortableColumn, readValue } from "./accessor";
 import type { ColumnModel, SortingState } from "./types";
-import { isEmptyValue, toText } from "./values";
+import { isEmptyValue, isSortableColumn, readValue, toText } from "./values";
 
 type RowComparator<TRow> = (a: TRow, b: TRow) => number;
 
@@ -59,7 +58,6 @@ export function sortRows<TRow>(
   });
 }
 
-// Empty values go last in both directions.
 function createComparator<TRow>(
   { accessor, sortingFn }: ColumnModel<TRow>,
   direction: 1 | -1,

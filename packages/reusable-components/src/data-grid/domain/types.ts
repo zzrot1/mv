@@ -2,7 +2,11 @@ export type RowId = string;
 
 export type ProcessingMode = "client" | "server";
 
-export type GridFeature = "filters" | "columnFilters" | "sorting" | "pagination";
+export type GridFeature =
+  | "filters"
+  | "columnFilters"
+  | "sorting"
+  | "pagination";
 
 export type ProcessingModes = Readonly<Record<GridFeature, ProcessingMode>>;
 
@@ -30,7 +34,10 @@ export type Accessor<TRow> = (keyof TRow & string) | ((row: TRow) => unknown);
 
 export type FilterVariant = "text" | "select" | "number-range";
 
-export type NumberRange = readonly [min: number | undefined, max: number | undefined];
+export type NumberRange = readonly [
+  min: number | undefined,
+  max: number | undefined,
+];
 
 export type FilterFn<TRow> = (
   cellValue: unknown,

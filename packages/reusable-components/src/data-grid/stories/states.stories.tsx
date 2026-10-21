@@ -31,7 +31,6 @@ export const Loading: Story = {
     const status = await canvas.findByRole("status");
     await expect(status).toHaveClass("rc-grid__overlay");
     await expect(status).toHaveTextContent("Loading…");
-    // The overlay fades in, so wait until it is actually showing.
     await waitFor(() => expect(find(status, ".rc-spinner")).toBeVisible());
     await expect(find(canvasElement, "table")).toHaveAttribute("aria-busy", "true");
     await expect(bodyRows(canvasElement)).toHaveLength(0);
@@ -153,8 +152,8 @@ export const StylingHooks: Story = {
 
 export const Unstyled: Story = {
   args: { unstyled: true },
-  play: async ({ canvasElement }) => {
-    await waitFor(() => expect(bodyRows(canvasElement)).toHaveLength(10));
-    await expect(find(canvasElement, ".rc-page")).toHaveClass("rc-root");
+  play: async ({ canvas, canvasElement }) => {
+    await waitFor(() => expect(canvas.getAllByRole("row")).toHaveLength(11));
+    await expect(canvasElement.querySelector('[class*="rc-"]')).toBeNull();
   },
 };

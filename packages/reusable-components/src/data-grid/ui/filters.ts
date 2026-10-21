@@ -1,11 +1,6 @@
 import type { ReactNode } from "react";
 
-import { filterFns } from "../domain/filter-fns";
-import {
-  matchHandler,
-  predicateHandler,
-  searchHandler,
-} from "../domain/filter-handlers";
+import { filterFns, matchHandler, predicateHandler, searchHandler } from "../domain/filtering";
 import type {
   Accessor,
   ColumnModel,

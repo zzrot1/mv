@@ -1,44 +1,51 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 import { cx } from "../../../shared/class-names";
-import { useDataGridContext } from "../grid-context";
+import { useGridContext } from "../context";
 import type { LoadingOverlayOptions } from "../types";
-import { useDelayedFlag } from "../use-delayed-flag";
-
-const DEFAULT_DELAY_MS = 150;
-const DEFAULT_MIN_DURATION_MS = 300;
 
 export function Spinner({ className, style }: { className?: string; style?: CSSProperties }) {
   return <span aria-hidden="true" className={cx("rc-spinner", className)} style={style} />;
 }
 
-export function LoadingOverlay({
-  active,
-  options,
-}: {
-  active: boolean;
-  options: LoadingOverlayOptions;
-}) {
-  const { labels, slot } = useDataGridContext();
+export function LoadingOverlay({ active, options }: { active: boolean; options: LoadingOverlayOptions }) {
+  const { css, labels, slot } = useGridContext();
   const visible = useDelayedFlag(active, {
-    delayMs: options.delayMs ?? DEFAULT_DELAY_MS,
-    minDurationMs: options.minDurationMs ?? DEFAULT_MIN_DURATION_MS,
+    delayMs: options.delayMs ?? 150,
+    minDurationMs: options.minDurationMs ?? 300,
   });
 
-  if (!visible) {
-    return null;
-  }
-
-  return (
+  return visible ? (
     <div {...slot("overlay", "rc-grid__overlay")} role="status">
       {options.content ?? (
         <>
           {options.spinner ?? <Spinner {...slot("spinner", "")} />}
-          <span className="rc-visually-hidden">{labels.loading}</span>
+          <span className={css("rc-visually-hidden")}>{labels.loading}</span>
         </>
       )}
     </div>
-  );
+  ) : null;
+}
+
+export function useDelayedFlag(active: boolean, { delayMs, minDurationMs }: { delayMs: number; minDurationMs: number }) {
+  const [visible, setVisible] = useState(false);
+  const shownAt = useRef(0);
+
+  useEffect(() => {
+    if (active === visible) {
+      return;
+    }
+
+    const wait = active ? delayMs : Math.max(0, minDurationMs - (Date.now() - shownAt.current));
+    const timer = setTimeout(() => {
+      shownAt.current = Date.now();
+      setVisible(active);
+    }, wait);
+
+    return () => clearTimeout(timer);
+  }, [active, delayMs, minDurationMs, visible]);
+
+  return visible;
 }

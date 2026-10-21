@@ -1,14 +1,16 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useEffectEvent, useState, type ReactNode } from "react";
 
+import { Checkbox, NumberInput, SearchInput, Select, TextInput } from "../../../inputs";
+import { FilterIcon } from "../../../shared/icons";
+import { useAnchoredPopover } from "../../../shared/use-anchored-popover";
+import { isActiveFilterValue } from "../../domain/filtering";
 import { toNumber, toText } from "../../domain/values";
-import { useDataGridContext } from "../grid-context";
-import type { ControlVariant, FilterOption, FilterRenderContext } from "../types";
-import { SearchIcon } from "./icons";
-import { TextInput } from "./text-input";
+import { useGridContext } from "../context";
+import type { ColumnDef, ControlVariant, FilterOption, FilterRenderContext } from "../types";
 
-export type FilterControlProps = {
+type FilterControlProps = {
   id: string;
   label: string;
   variant: ControlVariant;
@@ -22,156 +24,202 @@ export type FilterControlProps = {
   render?: (context: FilterRenderContext) => ReactNode;
 };
 
-const controls: Readonly<
-  Record<ControlVariant, (props: FilterControlProps) => ReactNode>
-> = {
-  "number-range": NumberRangeFilter,
-  search: SearchFilter,
-  select: SelectFilter,
-  text: TextFilter,
-  toggle: ToggleFilter,
-};
-
-export function FilterControl(props: FilterControlProps) {
-  const { id, label, onChange, onClose = noop, render, value, variant } = props;
+export function FilterControl({
+  debounceMs,
+  id,
+  label,
+  onChange,
+  onClose = () => {},
+  options,
+  placeholder,
+  placement,
+  render,
+  value,
+  variant,
+}: FilterControlProps) {
+  const { css, labels, slot, unstyled } = useGridContext();
+  const [draft, setDraft] = useDraft(value, onChange, debounceMs);
+  const control = { ...slot("control", ""), unstyled };
 
   if (render) {
     return render({ close: onClose, id, label, setValue: onChange, value });
   }
 
-  const Control = controls[variant];
-
-  return <Control {...props} />;
-}
-
-function SearchFilter({ debounceMs, label, onChange, placeholder, value }: FilterControlProps) {
-  const { labels, slot } = useDataGridContext();
-
-  return (
-    <div {...slot("search", "rc-grid__search")} role="search">
-      <SearchIcon />
-      <TextInput
-        {...slot("control", "rc-control rc-grid__search-input")}
+  if (variant === "search") {
+    return (
+      <SearchInput
+        {...slot("search", "rc-grid__search")}
         aria-label={label}
-        debounceMs={debounceMs}
-        onCommit={onChange}
+        onValueChange={setDraft}
         placeholder={placeholder ?? labels.searchPlaceholder}
-        type="search"
+        unstyled={unstyled}
+        value={toText(draft)}
+      />
+    );
+  }
+
+  if (variant === "select") {
+    return (
+      <Select
+        {...control}
+        aria-label={labels.filterBy(label)}
+        onValueChange={onChange}
+        options={[
+          { label: placeholder ?? (placement === "toolbar" ? labels.filterAll(label) : labels.allOptions), value: "" },
+          ...options,
+        ]}
         value={toText(value)}
       />
-    </div>
-  );
-}
+    );
+  }
 
-function TextFilter({
-  debounceMs,
-  label,
-  onChange,
-  placeholder,
-  placement,
-  value,
-}: FilterControlProps) {
-  const { labels, slot } = useDataGridContext();
+  if (variant === "toggle") {
+    return (
+      <Checkbox
+        {...slot("control", "rc-grid__toggle")}
+        checked={value === true}
+        label={label}
+        onCheckedChange={onChange}
+        unstyled={unstyled}
+      />
+    );
+  }
+
+  if (variant === "number-range") {
+    const [min, max] = Array.isArray(draft) ? draft.map(toNumber) : [];
+
+    return (
+      <div aria-label={labels.filterBy(label)} className={css("rc-range")} role="group">
+        <NumberInput
+          {...control}
+          aria-label={labels.minimum}
+          hideStepper
+          onValueChange={(next) => setDraft([next ?? undefined, max])}
+          placeholder={labels.minimum}
+          value={min ?? null}
+        />
+        <NumberInput
+          {...control}
+          aria-label={labels.maximum}
+          hideStepper
+          onValueChange={(next) => setDraft([min, next ?? undefined])}
+          placeholder={labels.maximum}
+          value={max ?? null}
+        />
+      </div>
+    );
+  }
 
   return (
     <TextInput
-      {...slot("control", "rc-control")}
+      {...control}
       aria-label={labels.filterBy(label)}
-      debounceMs={debounceMs}
-      onCommit={onChange}
-      placeholder={
-        placeholder ?? (placement === "toolbar" ? label : labels.filterPlaceholder)
-      }
-      value={toText(value)}
+      onValueChange={setDraft}
+      placeholder={placeholder ?? (placement === "toolbar" ? label : labels.filterPlaceholder)}
+      value={toText(draft)}
     />
   );
 }
 
-function SelectFilter({
-  label,
-  onChange,
-  options,
-  placeholder,
-  placement,
-  value,
-}: FilterControlProps) {
-  const { labels, slot } = useDataGridContext();
-  const allLabel =
-    placeholder ??
-    (placement === "toolbar" ? labels.filterAll(label) : labels.allOptions);
+export function ColumnFilter<TRow>({ column }: { column: ColumnDef<TRow> }) {
+  const { css, grid, labels, slot } = useGridContext<TRow>();
+  const { onToggle, popoverId, triggerRef } = useAnchoredPopover({
+    align: column.align,
+    focusSelector: "input, select",
+  });
+  const filters = grid.filters.column;
+  const value = filters.values[column.id];
+  const active = isActiveFilterValue(value);
+  const label = column.label ?? (typeof column.header === "string" ? column.header : column.id);
 
   return (
-    <select
-      {...slot("control", "rc-control")}
-      aria-label={labels.filterBy(label)}
-      onChange={(event) => onChange(event.target.value)}
-      value={toText(value)}
-    >
-      <option value="">{allLabel}</option>
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+    <>
+      <button
+        {...slot("filterTrigger", "rc-grid__filter-trigger")}
+        aria-label={active ? labels.filterByActive(label) : labels.filterBy(label)}
+        data-active={active || undefined}
+        popoverTarget={popoverId}
+        ref={triggerRef}
+        type="button"
+      >
+        <FilterIcon />
+      </button>
+      <div
+        {...slot("filterPopover", "rc-grid__filter-popover")}
+        aria-label={labels.filterBy(label)}
+        id={popoverId}
+        onToggle={onToggle}
+        popover="auto"
+        role="dialog"
+      >
+        <span className={css("rc-grid__filter-title")}>{labels.filterBy(label)}</span>
+        <FilterControl
+          debounceMs={filters.debounceMs}
+          id={column.id}
+          label={label}
+          onChange={(next) => filters.set(column.id, next)}
+          onClose={() => document.getElementById(popoverId)?.hidePopover()}
+          options={filters.getOptions(column)}
+          placeholder={column.filter?.placeholder}
+          placement="column"
+          render={column.filter?.render}
+          value={value}
+          variant={column.filter?.variant ?? "text"}
+        />
+        {active ? (
+          <button
+            {...slot("button", "rc-button")}
+            data-size="small"
+            data-variant="ghost"
+            onClick={() => filters.set(column.id, undefined)}
+            type="button"
+          >
+            {labels.clearFilter}
+          </button>
+        ) : null}
+      </div>
+    </>
   );
 }
 
-function NumberRangeFilter({
-  debounceMs,
-  label,
-  onChange,
-  value,
-}: FilterControlProps) {
-  const { labels, slot } = useDataGridContext();
-  const [min, max] = Array.isArray(value) ? value : [];
+const NOTHING_SENT = Symbol("nothing sent");
 
-  function commit(index: 0 | 1, text: string) {
-    const next = [toNumber(min), toNumber(max)];
-    next[index] = toNumber(text);
-    onChange(next);
+export function useDraft(value: unknown, onCommit: (value: unknown) => void, delayMs: number) {
+  const [draft, setDraft] = useState(value);
+  const [committed, setCommitted] = useState(value);
+  const [sent, setSent] = useState<unknown>(NOTHING_SENT);
+  const commit = useEffectEvent((next: unknown) => {
+    setSent(next);
+    onCommit(next);
+  });
+
+  if (value !== committed) {
+    setCommitted(value);
+    setSent(NOTHING_SENT);
+
+    if (value !== sent) {
+      setDraft(value);
+    }
   }
 
-  return (
-    <div aria-label={labels.filterBy(label)} className="rc-range" role="group">
-      <TextInput
-        {...slot("control", "rc-control")}
-        aria-label={labels.minimum}
-        debounceMs={debounceMs}
-        inputMode="decimal"
-        onCommit={(text) => commit(0, text)}
-        placeholder={labels.minimum}
-        type="number"
-        value={toText(min)}
-      />
-      <TextInput
-        {...slot("control", "rc-control")}
-        aria-label={labels.maximum}
-        debounceMs={debounceMs}
-        inputMode="decimal"
-        onCommit={(text) => commit(1, text)}
-        placeholder={labels.maximum}
-        type="number"
-        value={toText(max)}
-      />
-    </div>
-  );
+  useEffect(() => {
+    if (delayMs <= 0 || draft === committed) {
+      return;
+    }
+
+    const timer = setTimeout(() => commit(draft), delayMs);
+
+    return () => clearTimeout(timer);
+  }, [committed, delayMs, draft]);
+
+  function change(next: unknown) {
+    setDraft(next);
+
+    if (delayMs <= 0) {
+      setSent(next);
+      onCommit(next);
+    }
+  }
+
+  return [draft, change] as const;
 }
-
-function ToggleFilter({ label, onChange, value }: FilterControlProps) {
-  const { slot } = useDataGridContext();
-
-  return (
-    <label className="rc-toggle">
-      <input
-        {...slot("checkbox", "rc-checkbox")}
-        checked={value === true}
-        onChange={(event) => onChange(event.target.checked)}
-        type="checkbox"
-      />
-      <span>{label}</span>
-    </label>
-  );
-}
-
-function noop() {}

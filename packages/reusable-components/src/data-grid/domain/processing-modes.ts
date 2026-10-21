@@ -21,7 +21,9 @@ export function resolveFilterMode(
   filter: { mode?: ProcessingMode },
   modes: ProcessingModes,
 ): ProcessingMode {
-  return modes.pagination === "server" ? "server" : (filter.mode ?? modes.filters);
+  return modes.pagination === "server"
+    ? "server"
+    : (filter.mode ?? modes.filters);
 }
 
 export function hasServerProcessing(

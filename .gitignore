@@ -16,6 +16,7 @@ coverage/
 # storybook
 storybook-static/
 *storybook.log
+.vitest/
 
 # next.js
 /.next/
